@@ -1,0 +1,73 @@
+@import "tailwindcss";
+
+
+
+
+
+
+
+
+
+
+
+
+/* BIG LAYER WIPE */
+@keyframes wipeBigSlow {
+  0% { transform: translateX(-100%); }
+  50% { transform: translateX(0%); }
+  100% { transform: translateX(100%); }
+}
+.animate-wipeBigSlow {
+  animation: wipeBigSlow 2s ease-in-out forwards;
+}
+
+/* SMALL ACCENT LAYER */
+@keyframes wipeSmallSlow {
+  0% { transform: translateX(-120%); }
+  50% { transform: translateX(10%); }
+  100% { transform: translateX(120%); }
+}
+.animate-wipeSmallSlow {
+  animation: wipeSmallSlow 1.8s ease-in-out forwards;
+}
+
+/* TEXT SLIDE UP */
+@keyframes textUp {
+  0% { transform: translateY(100%); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+.animate-textUp {
+  animation: textUp 0.8s cubic-bezier(0.22,1,0.36,1) forwards;
+}
+
+/* FOREGROUND IMAGE APPEAR */
+@keyframes fgAppear {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.animate-fgAppear {
+  animation: fgAppear 1s ease forwards;
+  animation-delay: 1s; /* slightly after text */
+}
+
+
+.polygon{
+  clip-path: polygon(25% 0%, 100% 0%, 75% 100%, 0% 100%);
+}
+
+
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-scaleIn {
+  animation: scaleIn 0.2s ease-in-out;
+}
