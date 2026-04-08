@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import IMG8 from "../assets/IMG8.png";
 import pics9 from "../assets/pics9.jpeg";
 import pics8 from "../assets/pics8.jpeg";
 import { useNavigate } from "react-router-dom";
