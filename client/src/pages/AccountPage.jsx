@@ -41,7 +41,7 @@ const AccountPage = () => {
 
         try {
             const res = await axios.put(
-                "http://localhost:5000/api/auth/update-profile",
+                "https://fameuntold-85z3.vercel.app/api/auth/update-profile",
                 {
                     name: `${formData.firstName} ${formData.lastName}`,
                     currentPassword: formData.currentPassword,
@@ -78,7 +78,7 @@ const AccountPage = () => {
 
         try {
             const res = await axios.post(
-                "http://localhost:5000/api/auth/upload-profile",
+                "https://fameuntold-85z3.vercel.app/api/auth/upload-profile",
                 formData,
                 {
                     headers: {
@@ -91,7 +91,7 @@ const AccountPage = () => {
             localStorage.setItem("user", JSON.stringify(res.data.user));
 
             //  Update preview from server
-            setPreview(`http://localhost:5000${res.data.imageUrl}`);
+            setPreview(`https://fameuntold-85z3.vercel.app/${res.data.imageUrl}`);
              setUser(res.data.user);
             alert("Profile updated successfully!");
 
@@ -127,7 +127,7 @@ const AccountPage = () => {
                                 src={
                                     preview ||
                                     (user?.profileImage
-                                        ? `http://localhost:5000${user.profileImage}`
+                                        ? `https://fameuntold-85z3.vercel.app/${user.profileImage}`
                                         : profileArea)
                                 }
                                 className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border border-gray-400"

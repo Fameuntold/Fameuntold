@@ -1,41 +1,10 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-
+import axios from "axios";
 import IMG16 from "../assets/IMG16.PNG";
-import event1 from "../assets/event1.jpeg";
-import event2 from "../assets/event2.jpeg";
-import event3 from "../assets/event3.jpeg";
-import event4 from "../assets/event4.jpeg";
 
-/* DATA */
-const events = [
-  {
-    title: "Haven",
-    image: event1,
-    description:
-      "Haven with F.A.M.E Untold is a closed-door mentorship platform...",
-  },
-  {
-    title: "Raise a Sound",
-    image: event2,
-    description:
-      "An annual worship concert uniting people in a powerful atmosphere...",
-  },
-  {
-    title: "SUMES",
-    image: event3,
-    description:
-      "Promotes dialogue and collective responsibility toward a just society...",
-  },
-  {
-    title: "Limitless Conference",
-    image: event4,
-    description:
-      "A Bible-based teaching conference for purposeful living...",
-  },
-];
-
+/* EXTRA PROGRAMS */
 const extraPrograms = [
   "Talent & Empowerment Programs",
   "Conferences & Strategic Meetings",
@@ -69,7 +38,7 @@ const scaleIn = {
   },
 };
 
-/* COMPONENTS */
+/* SECTION WRAPPER */
 const Section = ({ children }) => (
   <motion.section
     variants={container}
@@ -82,6 +51,7 @@ const Section = ({ children }) => (
   </motion.section>
 );
 
+/* EVENT CARD */
 const EventCard = ({ title, description, image }) => (
   <motion.div
     variants={scaleIn}
@@ -89,11 +59,16 @@ const EventCard = ({ title, description, image }) => (
     className="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-lg transition"
   >
     <motion.img
-      src={image}
+      src={
+        image?.startsWith("http")
+          ? image
+          : `https://fameuntold-85z3.vercel.app${image}`
+      }
       alt={title}
       whileHover={{ scale: 1.05 }}
       className="w-full h-48 object-cover"
     />
+
     <div className="p-6">
       <h3 className="text-xl font-semibold mb-3">{title}</h3>
       <p className="text-gray-600 leading-relaxed">{description}</p>
@@ -102,9 +77,31 @@ const EventCard = ({ title, description, image }) => (
 );
 
 export default function EventsPage() {
-
-
   const navigate = useNavigate();
+
+  const [events, setEvents] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  /* FETCH EVENTS */
+  useEffect(() => {
+    fetchEvents();
+  }, []);
+
+  const fetchEvents = async () => {
+    try {
+      const res = await axios.get(
+        "https://fameuntold-85z3.vercel.app/api/events/getEvents"
+      );
+      setEvents(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  /* FILTER */
+  const filteredEvents = events.filter((event) =>
+    event.title?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -150,15 +147,33 @@ export default function EventsPage() {
         </div>
       </motion.div>
 
+      {/* SEARCH */}
+      <Section>
+        <motion.input
+          variants={fadeUp}
+          type="text"
+          placeholder="Search events..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full border px-4 py-3 rounded-lg shadow-sm focus:outline-none"
+        />
+      </Section>
+
       {/* EVENTS */}
       <Section>
         <motion.div
           variants={container}
           className="grid md:grid-cols-2 gap-8"
         >
-          {events.map((event, index) => (
-            <EventCard key={index} {...event} />
-          ))}
+          {filteredEvents.length === 0 ? (
+            <p className="text-center text-gray-500 col-span-2">
+              No events available
+            </p>
+          ) : (
+            filteredEvents.map((event, index) => (
+              <EventCard key={index} {...event} />
+            ))
+          )}
         </motion.div>
       </Section>
 
@@ -200,7 +215,7 @@ export default function EventsPage() {
           </p>
 
           <motion.button
-          onClick={()=>navigate('/register')}
+            onClick={() => navigate("/register")}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="bg-gray-50 text-black font-bold px-6 py-3 rounded-2xl hover:bg-gray-700 transition"
@@ -209,6 +224,7 @@ export default function EventsPage() {
           </motion.button>
         </motion.div>
       </Section>
+
     </div>
   );
 }

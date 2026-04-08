@@ -24,7 +24,7 @@ export default function ContactPage() {
     e.preventDefault();
 
     try {
-      const { data } = await axios.post("http://localhost:5000/api/contact/contact", formData);
+      const { data } = await axios.post("https://fameuntold-85z3.vercel.app/api/contact/contact", formData);
       alert(data.message);
 
       setFormData({

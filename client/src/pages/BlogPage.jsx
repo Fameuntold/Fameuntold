@@ -1,40 +1,33 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import IMG16 from "../assets/IMG16.PNG";
-import lead2 from "../assets/lead2.jpeg";
-import mis1 from "../assets/mis1.jpeg";
-
-const posts = [
-  {
-    title: "Building a Life of Purpose",
-    date: "Oct 25, 2025",
-    excerpt:
-      "Discover how to align your life with purpose and live intentionally every day.",
-    image: mis1,
-  },
-  {
-    title: "The Power of Mentorship",
-    date: "Oct 20, 2025",
-    excerpt:
-      "Mentorship can shape destinies. Learn why it matters and how to get involved.",
-    image: lead2,
-  },
-  {
-    title: "Growing Spiritually in a Busy World",
-    date: "Oct 15, 2025",
-    excerpt:
-      "Practical ways to stay spiritually grounded despite life’s demands.",
-    image: IMG16,
-  },
-];
 
 export default function BlogPage() {
   const navigate = useNavigate();
+
+  const [posts, setPosts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Filter posts based on search
+  /* FETCH BLOGS */
+  useEffect(() => {
+    fetchPosts();
+  }, []);
+
+  const fetchPosts = async () => {
+    try {
+      const res = await axios.get(
+        "https://fameuntold-85z3.vercel.app/api/news/getNews"
+      );
+      setPosts(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  /* FILTER */
   const filteredPosts = posts.filter((post) =>
-    post.title.toLowerCase().includes(searchTerm.toLowerCase())
+    post.title?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -74,6 +67,7 @@ export default function BlogPage() {
 
       {/* CONTENT */}
       <div className="max-w-7xl mx-auto px-6 py-16 grid md:grid-cols-3 gap-10">
+
         {/* POSTS */}
         <div className="md:col-span-2 grid md:grid-cols-2 gap-8">
           {posts.length === 0 ? (
@@ -90,14 +84,24 @@ export default function BlogPage() {
                 key={i}
                 className="bg-white rounded-2xl shadow hover:shadow-lg transition overflow-hidden"
               >
+                {/* IMAGE */}
                 <div
                   className="h-48 bg-cover bg-center"
-                  style={{ backgroundImage: `url(${post.image})` }}
-                ></div>
+                  style={{
+                    backgroundImage: `url(${
+                      post.image?.startsWith("http")
+                        ? post.image
+                        : `https://fameuntold-85z3.vercel.app${post.image}`
+                    })`,
+                  }}
+                />
 
+                {/* CONTENT */}
                 <div className="p-6">
                   <span className="text-xs text-purple-500 font-semibold">
-                    {post.date}
+                    {post.createdAt
+                      ? new Date(post.createdAt).toDateString()
+                      : ""}
                   </span>
 
                   <h3 className="mt-2 text-lg font-bold text-gray-800">
@@ -105,10 +109,13 @@ export default function BlogPage() {
                   </h3>
 
                   <p className="text-gray-600 text-sm mt-2">
-                    {post.excerpt}
+                    {post.excerpt || post.description}
                   </p>
 
-                  <button className="mt-4 text-purple-500 font-medium hover:underline">
+                  <button
+                    onClick={() => navigate(`/blog/${post._id}`)}
+                    className="mt-4 text-purple-500 font-medium hover:underline"
+                  >
                     Read More →
                   </button>
                 </div>
@@ -119,6 +126,7 @@ export default function BlogPage() {
 
         {/* SIDEBAR */}
         <div className="space-y-8">
+
           {/* SEARCH */}
           <div className="bg-white p-6 rounded-2xl shadow">
             <input
@@ -134,10 +142,14 @@ export default function BlogPage() {
           <div className="bg-white p-6 rounded-2xl shadow">
             <h3 className="font-semibold mb-4">Categories</h3>
             <ul className="space-y-2 text-gray-600">
-              <li className="hover:text-orange-500 cursor-pointer">Spiritual Growth</li>
-              <li className="hover:text-orange-500 cursor-pointer">Leadership</li>
-              <li className="hover:text-orange-500 cursor-pointer">Mentorship</li>
-              <li className="hover:text-orange-500 cursor-pointer">Faith</li>
+              {[...new Set(posts.map(p => p.category))].map((cat, i) => (
+                <li
+                  key={i}
+                  className="hover:text-orange-500 cursor-pointer"
+                >
+                  {cat}
+                </li>
+              ))}
             </ul>
           </div>
 
@@ -145,11 +157,12 @@ export default function BlogPage() {
           <div className="bg-white p-6 rounded-2xl shadow">
             <h3 className="font-semibold mb-4">Recent Posts</h3>
             <div className="space-y-3 text-sm text-gray-700">
-              <p>Walking in Purpose</p>
-              <p>Faith in Difficult Times</p>
-              <p>Becoming a Leader</p>
+              {posts.slice(0, 5).map((post, i) => (
+                <p key={i}>{post.title}</p>
+              ))}
             </div>
           </div>
+
         </div>
       </div>
     </div>

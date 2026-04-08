@@ -1,39 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import IMG16 from "../assets/IMG16.PNG";
+import axios from "axios";
 
-/* DATA */
-const posts = [
-  {
-    title: "Raise a Sound 2025 Worship Session",
-    date: "Oct 21, 2025",
-    image: IMG16,
-    type: "video",
-    src: "https://www.w3schools.com/html/mov_bbb.mp4",
-  },
-  {
-    title: "Limitless Conference Teaching",
-    date: "Oct 20, 2025",
-    image: IMG16,
-    type: "audio",
-    src: "https://www.w3schools.com/html/horse.mp3",
-  },
-  {
-    title: "Haven Mentorship Session",
-    date: "Oct 19, 2025",
-    image: IMG16,
-    type: "video",
-    src: "https://www.w3schools.com/html/movie.mp4",
-  },
-  {
-    title: "SUMES Panel Discussion",
-    date: "Oct 18, 2025",
-    image: IMG16,
-    type: "audio",
-    src: "https://www.w3schools.com/html/horse.mp3",
-  },
-];
-
+/* CATEGORIES */
 const categories = ["Worship", "Teachings", "Mentorship", "Prayer", "Sermons"];
 
 /* ANIMATIONS */
@@ -50,17 +19,35 @@ const fadeUp = {
 };
 
 export default function MediaPage() {
+  const [events, setEvents] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeMedia, setActiveMedia] = useState(null);
 
-  const filteredPosts = posts.filter((post) =>
-    post.title.toLowerCase().includes(searchTerm.toLowerCase())
+  /* FETCH FROM BACKEND */
+  useEffect(() => {
+    fetchEvents();
+  }, []);
+
+  const fetchEvents = async () => {
+    try {
+      const res = await axios.get(
+        "https://fameuntold-85z3.vercel.app/api/media/getMedia"
+      );
+      setEvents(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  /* FILTER */
+  const filteredPosts = events.filter((event) =>
+    event.title?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
     <div className="bg-gray-100 min-h-screen">
 
-      {/* HEADER (LIKE BLOG TITLE) */}
+      {/* HEADER */}
       <div className="max-w-7xl mx-auto px-6 pt-10">
         <h1 className="text-2xl font-bold mb-2">Tag: Media & Teachings</h1>
         <p className="text-sm text-gray-600 mb-6">
@@ -76,44 +63,64 @@ export default function MediaPage() {
         className="max-w-7xl mx-auto px-6 py-6 grid md:grid-cols-3 gap-6"
       >
 
-        {/* POSTS (LEFT SIDE) */}
+        {/* LEFT SIDE */}
         <div className="md:col-span-2 space-y-6">
           {filteredPosts.length === 0 ? (
             <div className="bg-white p-6 text-center text-gray-500 text-sm">
               No media available at this time
             </div>
-          ) : filteredPosts.map((post, i) => (
-            <motion.div
-              key={i}
-              variants={fadeUp}
-              className="flex gap-4 bg-white p-4 shadow-sm hover:shadow-md transition cursor-pointer"
-            >
-              {/* IMAGE */}
-              <div
-                className="w-32 h-24 bg-cover bg-center flex-shrink-0"
-                style={{ backgroundImage: `url(${post.image})` }}
-              />
+          ) : (
+            filteredPosts.map((event, i) => (
+              <motion.div
+                key={i}
+                variants={fadeUp}
+                className="flex gap-4 bg-white p-4 shadow-sm hover:shadow-md transition cursor-pointer"
+              >
+                {/* IMAGE */}
+                <div
+                  className="w-32 h-24 bg-cover bg-center flex-shrink-0"
+                  style={{
+                    backgroundImage: `url(${
+                      event.image?.startsWith("http")
+                        ? event.image
+                        : `https://fameuntold-85z3.vercel.app${event.image}`
+                    })`,
+                  }}
+                />
 
-              {/* TEXT */}
-              <div className="flex flex-col justify-between">
-                <h3 className="text-sm font-semibold text-gray-800">
-                  {post.title}
-                </h3>
+                {/* TEXT */}
+                <div className="flex flex-col justify-between">
+                  <h3 className="text-sm font-semibold text-gray-800">
+                    {event.title}
+                  </h3>
 
-                <p className="text-xs text-gray-500">{post.date}</p>
+                  <p className="text-xs text-gray-500">
+                    {event.createdAt
+                      ? new Date(event.createdAt).toDateString()
+                      : ""}
+                  </p>
 
-                <button
-                  onClick={() => setActiveMedia(post)}
-                  className="text-xs text-blue-600 hover:underline mt-1"
-                >
-                  {post.type === "video" ? "Watch (Mp4)" : "Listen (Mp3)"}
-                </button>
-              </div>
-            </motion.div>
-          ))}
+                  <button
+                    onClick={() =>
+                      setActiveMedia({
+                        ...event,
+                        type: event.type || "video",
+                        src: event.src || event.mediaUrl || "",
+                      })
+                    }
+                    className="text-xs text-blue-600 hover:underline mt-1"
+                  >
+                    {(event.type || "video") === "video"
+                      ? "Watch (Mp4)"
+                      : "Listen (Mp3)"}
+                  </button>
+                </div>
+              </motion.div>
+            ))
+          )}
         </div>
 
-        {/* SIDEBAR (RIGHT SIDE) */}
+        {/* RIGHT SIDEBAR */}
         <motion.div variants={fadeUp} className="space-y-6">
 
           {/* SEARCH */}
@@ -134,14 +141,20 @@ export default function MediaPage() {
             </h3>
 
             <div className="space-y-3 text-sm">
-              {posts.map((post, i) => (
+              {events.slice(0, 5).map((event, i) => (
                 <div key={i} className="flex gap-2 items-center">
                   <div
                     className="w-12 h-12 bg-cover bg-center"
-                    style={{ backgroundImage: `url(${post.image})` }}
+                    style={{
+                      backgroundImage: `url(${
+                        event.image?.startsWith("http")
+                          ? event.image
+                          : `https://fameuntold-85z3.vercel.app${event.image}`
+                      })`,
+                    }}
                   />
                   <p className="text-xs text-gray-700 line-clamp-2">
-                    {post.title}
+                    {event.title}
                   </p>
                 </div>
               ))}
