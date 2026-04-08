@@ -5,28 +5,30 @@ import {
 } from "recharts";
 import { useNavigate } from "react-router-dom";
 import {
-  FaNewspaper, FaCalendarAlt, FaPhotoVideo, FaUsers
+  FaNewspaper,
+  FaCalendarAlt,
+  FaPhotoVideo,
+  FaUsers
 } from "react-icons/fa";
-import axios from "axios";
 import logo from "../assets/logo.png";
+import axios from "axios"
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
 
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("news");
-
   const [data, setData] = useState({ news: [], events: [], media: [] });
   const [users, setUsers] = useState([]);
-  const [contacts, setContacts] = useState([]);
-  const [subscribers, setSubscribers] = useState([]);
 
   const [form, setForm] = useState({ title: "", description: "", link: "" });
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState("");
 
-  const [userSearch, setUserSearch] = useState("");
-  const [subscriberSearch, setSubscriberSearch] = useState("");
+  const [editModal, setEditModal] = useState(false);
+  const [currentItem, setCurrentItem] = useState(null);
+
+  const [search, setSearch] = useState("");
+  const [viewUser, setViewUser] = useState(null);
 
   const colors = ["#7c3aed", "#22c55e", "#f59e0b", "#ef4444", "#3b82f6"];
 
@@ -35,32 +37,34 @@ export default function AdminDashboard() {
     { key: "events", label: "Events", icon: <FaCalendarAlt /> },
     { key: "media", label: "Media", icon: <FaPhotoVideo /> },
     { key: "users", label: "Users", icon: <FaUsers /> },
-    { key: "contacts", label: "Contacts", icon: "📩" },
-    { key: "subscribers", label: "Subscribers", icon: "📧" },
   ];
 
-  // ================= FETCH =================
   useEffect(() => {
-    fetchAll();
+    fetchData();
+    fetchUsers();
   }, []);
 
-  const fetchAll = async () => {
-    try {
-      const [news, events, media, usersRes, contactsRes, subsRes] = await Promise.all([
-        fetch("https://fameuntold.vercel.app/api/news").then(r => r.json()),
-        fetch("https://fameuntold.vercel.app/api/events").then(r => r.json()),
-        fetch("https://fameuntold.vercel.app/api/media").then(r => r.json()),
-        axios.get("https://fameuntold.vercel.app/api/admin/users"),
-        axios.get("https://fameuntold.vercel.app/api/contact/get-contact"),
-        axios.get("https://fameuntold.vercel.app/api/newsletter/all"),
-      ]);
+  // ================= FETCH =================
+  const fetchData = async () => {
+    const news = await fetch("https://fameuntold.vercel.app/api/news").then(res => res.json());
+    const events = await fetch("https://fameuntold.vercel.app/api/events").then(res => res.json());
+    const media = await fetch("https://fameuntold.vercel.app/api/media").then(res => res.json());
 
-      setData({ news, events, media });
-      setUsers(usersRes.data || []);
-      setContacts(contactsRes.data || []);
-      setSubscribers(subsRes.data || []);
-    } catch (err) {
-      console.log(err);
+    setData({ news, events, media });
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await fetch("https://fameuntold.vercel.app/api/admin/users", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const data = await res.json();
+      setUsers(Array.isArray(data) ? data : []);
+    } catch {
+      setUsers([]);
     }
   };
 
@@ -91,32 +95,57 @@ export default function AdminDashboard() {
     setForm({ title: "", description: "", link: "" });
     setImage(null);
     setPreview("");
-    fetchAll();
+    fetchData();
   };
 
-  const deleteItem = async (id) => {
+  const openEdit = (item) => {
+    setCurrentItem(item);
+    setForm({
+      title: item.title,
+      description: item.description || "",
+      link: item.link || "",
+    });
+    setPreview(item.image ? `https://fameuntold.vercel.app/${item.image}` : "");
+    setEditModal(true);
+  };
+
+  const handleUpdate = async () => {
+    const formData = new FormData();
+    formData.append("title", form.title);
+    formData.append("description", form.description);
+    formData.append("link", form.link);
+    if (image) formData.append("image", image);
+
+    await fetch(`https://fameuntold.vercel.app/api/${activeTab}/${currentItem._id}`, {
+      method: "PUT",
+      body: formData,
+    });
+
+    setEditModal(false);
+    setImage(null);
+    fetchData();
+  };
+
+  const handleDelete = async (id) => {
     await fetch(`https://fameuntold.vercel.app/api/${activeTab}/${id}`, {
       method: "DELETE",
     });
-    fetchAll();
+    fetchData();
   };
 
   const deleteUser = async (id) => {
+    const token = localStorage.getItem("token");
+
     await fetch(`https://fameuntold.vercel.app/api/admin/users/${id}`, {
       method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
     });
-    fetchAll();
+
+    fetchUsers();
   };
 
-  // ================= FILTER =================
-  const filteredUsers = users.filter(user =>
-    user.email.toLowerCase().includes(userSearch.toLowerCase())
-  );
 
-  const filteredSubscribers = subscribers.filter(sub =>
-    sub.email.toLowerCase().includes(subscriberSearch.toLowerCase())
-  );
-
+  // ================= CHART =================
   const chartData = [
     { name: "Users", value: users.length },
     { name: "News", value: data.news.length },
@@ -124,206 +153,329 @@ export default function AdminDashboard() {
     { name: "Media", value: data.media.length },
   ];
 
+  const [contacts, setContacts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const [userSearch, setUserSearch] = useState("");
+  const [contactSearch, setContactSearch] = useState("");
+
+
+  // Filtered users
+  const filteredUsers = users.filter(user =>
+    user.name.toLowerCase().includes(userSearch.toLowerCase()) ||
+    user.email.toLowerCase().includes(userSearch.toLowerCase())
+  );
+
+  // Filtered contacts
+  const filteredContacts = contacts.filter(contact =>
+    contact.name.toLowerCase().includes(contactSearch.toLowerCase()) ||
+    contact.email.toLowerCase().includes(contactSearch.toLowerCase()) ||
+    contact.message.toLowerCase().includes(contactSearch.toLowerCase())
+  );
+
+  const [subscribers, setSubscribers] = useState([]);
+  const [loadingSubscribers, setLoadingSubscribers] = useState(true);
+  const [subscriberSearch, setSubscriberSearch] = useState("");
+  const filteredSubscribers = subscribers.filter(sub =>
+    sub.email.toLowerCase().includes(subscriberSearch.toLowerCase())
+  );
+
+
+
+  const fetchContacts = async () => {
+    try {
+      const { data } = await axios.get("https://fameuntold.vercel.app/api/contact/get-contact");
+      setContacts(data);
+      setLoading(false);
+    } catch (err) {
+      console.error(err);
+      setError("Failed to fetch contacts.");
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchContacts();
+  }, []);
+
+
+  // Fetch subscribers
+  const fetchSubscribers = async () => {
+    try {
+      const { data } = await axios.get("https://fameuntold.vercel.app/api/newsletter/all");
+      setSubscribers(data);
+      setLoadingSubscribers(false);
+    } catch (err) {
+      console.error(err);
+      setLoadingSubscribers(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSubscribers();
+  }, [])
+
+
+  if (loading) return <p className="p-6">Loading messages...</p>;
+  if (error) return <p className="p-6 text-red-500">{error}</p>;
+
+  if (contacts.length === 0) {
+    return <p className="p-6 text-gray-600">No messages available.</p>;
+  }
+
   return (
-   <div className="flex min-h-screen bg-gray-100">
+    <div className="flex min-h-screen bg-gray-100">
 
-  {/* MOBILE MENU BUTTON */}
-  <button
-    onClick={() => setSidebarOpen(true)}
-    className="md:hidden fixed top-4 left-4 z-50 bg-purple-700 text-white p-3 rounded-full"
-  >
-    ☰
-  </button>
+      {/* SIDEBAR */}
+      <div className="w-64 bg-gray-900 text-white p-6 flex flex-col">
 
-  {/* OVERLAY */}
-  {sidebarOpen && (
-    <div
-      onClick={() => setSidebarOpen(false)}
-      className="fixed inset-0 bg-black/40 z-40 md:hidden"
-    />
-  )}
+        <div className="w-full flex items-center">
+          <img
+            className="w-18 h-16 filter brightness-0 invert"
+            src={logo}
+            alt=""
+          />
+          <h6 className="text-purple-50 w-full font-bold">FAME UNTOLD</h6>
+        </div>
 
-  {/* SIDEBAR */}
-  <div
-    className={`
-      fixed md:static top-0 left-0 h-full w-64 bg-gray-900 text-white p-4 flex flex-col
-      transform transition-all duration-300 z-50
-      ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
-      md:translate-x-0
-    `}
-  >
-    {/* CLOSE */}
-    <div className="md:hidden flex justify-end mb-4">
-      <button onClick={() => setSidebarOpen(false)}>✕</button>
-    </div>
+        <div className="space-y-2">
+          {menuItems.map((item) => (
+            <button
+              key={item.key}
+              onClick={() => setActiveTab(item.key)}
+              className={`flex items-center gap-3 w-full p-3 rounded-lg ${activeTab === item.key
+                ? "bg-purple-600"
+                : "hover:bg-gray-700"
+                }`}
+            >
+              <span>{item.icon}</span>
+              <span>{item.label}</span>
+            </button>
+          ))}
+        </div>
 
-    {/* MENU */}
-    <div className="space-y-2 mt-4">
-      {menuItems.map((item) => (
         <button
-          key={item.key}
-          onClick={() => {
-            setActiveTab(item.key);
-            setSidebarOpen(false);
-          }}
-          className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left ${
-            activeTab === item.key
-              ? "bg-purple-600"
-              : "hover:bg-gray-700"
-          }`}
+          onClick={handleLogout}
+          className="mt-auto bg-red-500 p-3 rounded-lg"
         >
-          <span className="text-lg">{item.icon}</span>
-          <span className="text-sm">{item.label}</span>
+          Logout
         </button>
-      ))}
-    </div>
+      </div>
 
-    <button
-      onClick={handleLogout}
-      className="mt-auto bg-red-500 p-3 rounded-lg"
-    >
-      Logout
-    </button>
-  </div>
+      {/* MAIN */}
+      <div className="flex-1 p-6">
 
-  {/* MAIN CONTENT */}
-  <div className="flex-1 p-4 md:p-6 md:ml-64">
+        <h1 className="text-2xl font-bold mb-6">Admin Dashboard</h1>
 
-    {/* TITLE */}
-    <h1 className="text-xl md:text-2xl font-bold mb-4">
-      Admin Dashboard
-    </h1>
-
-    {/* ================= DASHBOARD (DEFAULT) ================= */}
-    {activeTab === "news" && (
-      <>
         {/* CHARTS */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div className="grid md:grid-cols-2 gap-6 mb-10">
 
-          <div className="bg-white p-4 rounded-xl shadow">
+          <div className="bg-white p-6 rounded-2xl shadow">
             <ResponsiveContainer width="100%" height={250}>
               <BarChart data={chartData}>
                 <XAxis dataKey="name" />
                 <YAxis />
                 <Tooltip />
-                <Bar dataKey="value" />
+                <Bar dataKey="value">
+                  {chartData.map((entry, index) => (
+                    <Cell key={index} fill={colors[index]} />
+                  ))}
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
 
-          <div className="bg-white p-4 rounded-xl shadow">
+          <div className="bg-white p-6 rounded-2xl shadow">
             <ResponsiveContainer width="100%" height={250}>
               <PieChart>
-                <Pie data={chartData} dataKey="value" outerRadius={80} />
+                <Pie data={chartData} dataKey="value" outerRadius={80} label>
+                  {chartData.map((entry, index) => (
+                    <Cell key={index} fill={colors[index]} />
+                  ))}
+                </Pie>
               </PieChart>
             </ResponsiveContainer>
           </div>
+
         </div>
 
         {/* FORM */}
-        <div className="bg-white p-4 rounded-xl shadow mb-6">
-          <input
-            placeholder="Title"
-            className="w-full border p-2 mb-2"
-            onChange={(e) =>
-              setForm({ ...form, title: e.target.value })
-            }
-          />
+        {activeTab !== "users" && (
+          <div className="bg-white p-6 rounded-2xl shadow mb-10">
+            <h2 className="font-bold mb-4 capitalize">Add {activeTab}</h2>
 
-          <textarea
-            placeholder="Description"
-            className="w-full border p-2 mb-2"
-            onChange={(e) =>
-              setForm({ ...form, description: e.target.value })
-            }
-          />
+            <div className="grid md:grid-cols-3 gap-4">
+              <input placeholder="Title" value={form.title}
+                onChange={(e) => setForm({ ...form, title: e.target.value })}
+                className="border p-2 rounded" />
 
-          <input
-            type="file"
-            onChange={handleImage}
-            className="mb-2"
-          />
+              <input placeholder="Description" value={form.description}
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
+                className="border p-2 rounded" />
 
-          {preview && (
-            <img src={preview} className="w-24 mb-2" />
-          )}
+              {activeTab === "media" && (
+                <input placeholder="Link" value={form.link}
+                  onChange={(e) => setForm({ ...form, link: e.target.value })}
+                  className="border p-2 rounded" />
+              )}
 
-          <button
-            onClick={handleSubmit}
-            className="bg-purple-600 text-white px-4 py-2 rounded"
-          >
-            Add
-          </button>
-        </div>
+              <input type="file" onChange={handleImage} />
+            </div>
 
-        {/* TABLE */}
-        <div className="bg-white p-4 rounded-xl shadow overflow-x-auto">
-          <table className="min-w-full text-sm">
-            <thead>
-              <tr className="border-b">
-                <th className="p-2 text-left">Title</th>
-                <th className="p-2">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.news.map((item) => (
-                <tr key={item._id} className="border-b">
-                  <td className="p-2">{item.title}</td>
-                  <td className="p-2">
-                    <button
-                      onClick={() => deleteItem(item._id)}
-                      className="text-red-500"
-                    >
-                      Delete
-                    </button>
-                  </td>
+            {preview && <img src={preview} className="w-32 mt-3 rounded" />}
+
+            <button onClick={handleSubmit}
+              className="bg-purple-700 text-white px-4 py-2 mt-4 rounded">
+              Add
+            </button>
+          </div>
+        )}
+
+        {/* USERS TABLE */}
+        {activeTab === "users" && (
+          <div className="bg-gray-300 p-6 rounded-2xl shadow">
+            <h2 className="text-3xl font-bold mb-4">Registered Users</h2>
+
+            <input
+              placeholder="Search users..."
+              value={userSearch}
+              onChange={(e) => setUserSearch(e.target.value)}
+              className="border outline-0 border-gray-200 p-2 mb-4 w-full rounded"
+            />
+
+            <table className="w-full text-left">
+              <thead>
+                <tr className="border-b bg-purple-500">
+                  <th className="p-2">Name</th>
+                  <th className="p-2">Email</th>
+                  <th className="p-2">Role</th>
+                  <th className="p-2">Phone</th>
+                  <th className="p-2">Location</th>
+                  <th className="p-2">Message</th>
+                  <th className="p-2">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </>
-    )}
+              </thead>
 
-    {/* ================= USERS ================= */}
-    {activeTab === "users" && (
-      <div className="bg-white p-4 rounded-xl shadow overflow-x-auto">
+              <tbody>
+                {filteredUsers.map((user) => (
+                  <tr key={user._id} className="border-b hover:bg-gray-50">
+                    <td className="p-2">{user.name}</td>
+                    <td className="p-2">{user.email}</td>
+                    <td className="p-2">{user.role}</td>
+                    <td className="p-2">{user.phone || "-"}</td>
+                    <td className="p-2">{user.location || "-"}</td>
+                    <td className="p-2">{user.message || "-"}</td>
 
-        <input
-          placeholder="Search user"
-          className="border p-2 mb-4 w-full"
-          onChange={(e) => setUserSearch(e.target.value)}
-        />
+                    <td className="p-2 space-x-2">
+                      <button onClick={() => setViewUser(user)} className="bg-green-500 text-white px-2 py-1 rounded">View</button>
+                      <button onClick={() => deleteUser(user._id)} className="bg-red-500 text-white px-2 py-1 rounded">Delete</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
 
-        <table className="min-w-full text-sm">
-          <thead>
-            <tr className="border-b">
-              <th className="p-2 text-left">Email</th>
-              <th className="p-2">Action</th>
-            </tr>
-          </thead>
+        {/* USER MODAL */}
+        {viewUser && (
+          <div className="fixed inset-0 bg-black/50 flex justify-center items-center">
+            <div className="bg-white p-6 rounded-2xl w-96">
+              <h2 className="font-bold mb-3">User Details</h2>
 
-          <tbody>
-            {filteredUsers.map((user) => (
-              <tr key={user._id} className="border-b">
-                <td className="p-2">{user.email}</td>
-                <td className="p-2">
-                  <button
-                    onClick={() => deleteUser(user._id)}
-                    className="text-red-500"
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+              <p>Name: {viewUser.name}</p>
+              <p>Email: {viewUser.email}</p>
+              <p>Role: {viewUser.role}</p>
+
+              <button onClick={() => setViewUser(null)}
+                className="bg-gray-800 text-white px-4 py-2 mt-3 rounded">
+                Close
+              </button>
+            </div>
+          </div>
+        )}
+
+        {activeTab === "users" && (
+          <div className="max-w-7xl mx-auto px-6 py-10">
+            <h1 className="text-3xl font-bold mb-6">Contact Messages</h1>
+
+            <input
+              placeholder="Search messages..."
+              value={contactSearch}
+              onChange={(e) => setContactSearch(e.target.value)}
+              className="border outline-0 border-purple-400 p-2 mb-4 w-full rounded"
+            />
+
+            <div className="overflow-x-auto">
+              <table className="w-full table-auto border-collapse border border-gray-300">
+                <thead>
+                  <tr className="bg-purple-500">
+                    <th className="border border-gray-300 px-4 py-2 text-left">Name</th>
+                    <th className="border border-gray-300 px-4 py-2 text-left">Email</th>
+                    <th className="border border-gray-300 px-4 py-2 text-left">Message</th>
+                    <th className="border border-gray-300 px-4 py-2 text-left">Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredContacts.map((contact) => (
+                    <tr key={contact._id} className="hover:bg-gray-50">
+                      <td className="border border-gray-300 px-4 py-2">{contact.name}</td>
+                      <td className="border border-gray-300 px-4 py-2">{contact.email}</td>
+                      <td className="border border-gray-300 px-4 py-2">{contact.message}</td>
+                      <td className="border border-gray-300 px-4 py-2">
+                        {new Date(contact.createdAt).toLocaleString()}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        )}
+        {activeTab === "users" && (
+          <div className="bg-gray-200 p-6 rounded-2xl shadow mt-10">
+            <h2 className="text-3xl font-bold mb-4">Newsletter Subscribers</h2>
+
+            <input
+              placeholder="Search by email..."
+              value={subscriberSearch}
+              onChange={(e) => setSubscriberSearch(e.target.value)}
+              className="border outline-0 border-gray-300 p-2 mb-4 w-full rounded"
+            />
+
+            {loadingSubscribers ? (
+              <p>Loading subscribers...</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full table-auto border-collapse border border-gray-300">
+                  <thead>
+                    <tr className="bg-purple-500 text-white">
+                      <th className="border border-gray-300 px-4 py-2">Email</th>
+                      <th className="border border-gray-300 px-4 py-2">Subscribed At</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredSubscribers.map((sub) => (
+                      <tr key={sub._id} className="hover:bg-gray-50">
+                        <td className="border border-gray-300 px-4 py-2">{sub.email}</td>
+                        <td className="border border-gray-300 px-4 py-2">
+                          {new Date(sub.subscribedAt).toLocaleString()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+
+        )}
+
+
 
       </div>
-    )}
-
-  </div>
-</div>
+    </div>
   );
 }
