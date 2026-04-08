@@ -57,7 +57,7 @@ const OurJourney = () => {
             transforming lives through faith, leadership, and impactful programs.
           </p>
 
-          <button onClick={()=>navigate('/mentorship')} className="bg-purple-50 text-black px-6 py-3 rounded w-fit font-semibold hover:bg-purple-300 transition">
+          <button onClick={()=>navigate('/mentorship')} className="bg-purple-50 text-black px-6 py-3 mb-13 rounded w-fit font-semibold hover:bg-purple-300 transition">
             Find out more
           </button>
         </div>

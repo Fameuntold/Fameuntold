@@ -28,6 +28,7 @@ import BlogPage from './pages/BlogPage';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminRoute from './pages/routes/AdminRoutes';
 import LoginPage from "./pages/LoginPage";
+import AccountPage from './pages/AccountPage';
 
 
 const App = () => {
@@ -63,6 +64,7 @@ const App = () => {
         <Route path="/contact-page" element={<ContactPage />} />
         <Route path="/blog-page" element={<BlogPage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/account-page" element={<AccountPage />} />
 
         {/* 🔐 Protected Admin Route */}
         <Route

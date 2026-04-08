@@ -5,10 +5,10 @@ export default function LoadingButton({ loading, text, loadingText, onClick }) {
     <button
       onClick={onClick}
       disabled={loading}
-      className={`w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold text-white transition-all duration-200 ${
+      className={`w-full flex items-center justify-center gap-2 px-4 py-4 rounded-lg font-semibold text-white transition-all duration-200 ${
         loading
           ? "bg-purple-400 cursor-not-allowed"
-          : "bg-purple-700 hover:bg-purple-600"
+          : "bg-gradient-to-r from-gray-800 to-purple-500 text-xl hover:bg-purple-600"
       }`}
     >
       {loading && (

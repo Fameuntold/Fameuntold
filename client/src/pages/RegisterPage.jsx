@@ -10,7 +10,8 @@ export default function RegisterPage() {
   const [selectedRole, setSelectedRole] = useState("Mentee");
   const navigate = useNavigate();
 
-  const [loading, setLoading] = useState(false); 
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
 
   const [formData, setFormData] = useState({
     name: "",
@@ -34,9 +35,36 @@ export default function RegisterPage() {
     });
   };
 
+  const validatePassword = (password) => {
+    if (password.length < 8) {
+      return "Password must be at least 8 characters";
+    }
+    if (!/^[A-Z]/.test(password)) {
+      return "Password must start with a capital letter";
+    }
+    if (!/[0-9]/.test(password)) {
+      return "Password must include at least one number";
+    }
+    if (!/[!@#$%^&*(),.?\":{}|<>]/.test(password)) {
+      return "Password must include a special character";
+    }
+    return "";
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true); // ✅ START LOADING
+
+    //  VALIDATE PASSWORD
+    const passwordError = validatePassword(formData.password);
+
+    if (passwordError) {
+      setErrors({ password: passwordError });
+      return;
+    } else {
+      setErrors({});
+    }
+
+    setLoading(true);
 
     try {
       const res = await fetch("http://localhost:5000/api/auth/register", {
@@ -50,7 +78,6 @@ export default function RegisterPage() {
         })
       });
 
-      // FIX YOUR JSON ERROR HERE
       const text = await res.text();
       const data = text ? JSON.parse(text) : {};
 
@@ -64,17 +91,15 @@ export default function RegisterPage() {
         return;
       }
 
-      // Save user
       localStorage.setItem("user", JSON.stringify(data.user));
       localStorage.setItem("token", data.token);
 
       setModal({
         open: true,
         type: "success",
-        message: "Registration successful 🎉",
+        message: " You have successfully complete your registration",
       });
 
-      // Reset form
       setFormData({
         name: "",
         email: "",
@@ -84,9 +109,8 @@ export default function RegisterPage() {
         message: ""
       });
 
-      //  Redirect after 2s
       setTimeout(() => {
-        navigate("/login");
+        navigate("/");
       }, 2000);
 
     } catch (error) {
@@ -99,12 +123,12 @@ export default function RegisterPage() {
       });
     }
 
-    setLoading(false); //  STOP LOADING
+    setLoading(false);
   };
 
   return (
     <div
-      className="relative min-h-screen bg-cover bg-center flex items-center justify-center px-4"
+      className="relative min-h-screen bg-cover bg-center flex  items-center justify-center py-12 px-4"
       style={{ backgroundImage: `url(${getinvolvedimg1})` }}
     >
       <div className="absolute inset-0 bg-black/60"></div>
@@ -121,11 +145,10 @@ export default function RegisterPage() {
             <button
               key={role}
               onClick={() => setSelectedRole(role)}
-              className={`px-4 py-2 rounded-full border ${
-                selectedRole === role
-                  ? "bg-amber-500 text-white"
-                  : "bg-white text-gray-700"
-              }`}
+              className={`px-4 py-2 rounded-full border ${selectedRole === role
+                ? "bg-purple-500 text-white"
+                : "bg-white text-gray-700"
+                }`}
             >
               {role}
             </button>
@@ -137,7 +160,25 @@ export default function RegisterPage() {
 
           <input name="name" placeholder="Full Name" value={formData.name} onChange={handleChange} className="border p-3 rounded-lg" required />
           <input type="email" name="email" placeholder="Email" value={formData.email} onChange={handleChange} className="border p-3 rounded-lg" required />
-          <input type="password" name="password" placeholder="Password" value={formData.password} onChange={handleChange} className="border p-3 rounded-lg" required />
+          <div>
+            <input
+              type="password"
+              name="password"
+              placeholder="Password"
+              value={formData.password}
+              onChange={handleChange}
+              className={`border p-3 rounded-lg w-full ${errors.password ? "border-red-500" : ""
+                }`}
+              required
+            />
+
+            {/*  ERROR MESSAGE */}
+            {errors.password && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.password}
+              </p>
+            )}
+          </div>
           <input name="phone" placeholder="Phone" value={formData.phone} onChange={handleChange} className="border p-3 rounded-lg" required />
           <input name="location" placeholder="Location" value={formData.location} onChange={handleChange} className="border p-3 rounded-lg" required />
 

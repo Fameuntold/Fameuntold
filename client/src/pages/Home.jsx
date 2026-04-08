@@ -5,7 +5,6 @@ import OwnerSpeech from '../component/OwnerSpeech'
 import OurJourney from '../component/OurJourney'
 import DonatePage from '../component/DonatePage'
 import Contact from '../component/Contact'
-
 import PastEvent from '../component/PastEvent'
 import Achievement from '../component/Achievement'
 import VolunteersSection from '../component/VolunteersSection'
@@ -15,8 +14,8 @@ const Home = () => {
   return (
     <div>
         <Hero/>
+     
         <Welcome/>
-        
         <OwnerSpeech/>
         <OurJourney/>
        

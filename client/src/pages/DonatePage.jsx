@@ -29,14 +29,14 @@ export default function DonatePage() {
     };
 
     return (
-        <div className="h-screen grid md:grid-cols-2">
+        <div className="min-h-screen grid md:grid-cols-2">
 
             {/* LEFT PANEL */}
-            <div className="bg-[#dbe7ef] flex flex-col justify-center items-center text-center px-6">
+            <div className="bg-[#dbe7ef] flex flex-col justify-center text-center px-6">
 
                 {/* MINISTRY NAME */}
 
-                <div className="w-[18%] flex items-center flex-col">
+                <div className="w-full mt-5 flex items-center flex-col">
                     <img className="w-16 h-16" src={logo} alt="" />
                     <h6 className="text-purple-900 font-bold">FAME UNTOLD</h6>
                 </div>

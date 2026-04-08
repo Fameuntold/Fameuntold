@@ -184,7 +184,7 @@ export default function Footer() {
                 Subscribe
               </motion.button>
             </form>
-            {message && <p className="mt-3 text-sm text-red-700">{message}</p>}
+            {message && <p className="mt-3 text-sm text-blue-900">{message}</p>}
           </div>
 
 
