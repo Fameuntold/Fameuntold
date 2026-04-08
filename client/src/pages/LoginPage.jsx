@@ -2,7 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import StatusModal from "../component/StatusModal";
-import Loader from "../component/Loader"; // ✅ your loader
+import Loader from "../component/Loader"; 
 import getinvolvedimg1 from "../assets/getinvolvedimg1.png";
 import { FiUser, FiLock } from "react-icons/fi";
 
