@@ -21,7 +21,7 @@ connectDB();
 const app = express();
 
 app.use(cors({
-  origin: "https://tal-bank-j87e.vercel.app",
+  origin: "https://fameuntold-v6c3.vercel.app",
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
@@ -31,7 +31,7 @@ app.use(cors({
 //  Handle preflight WITHOUT crashing
 app.use((req, res, next) => {
   if (req.method === "OPTIONS") {
-    res.header("Access-Control-Allow-Origin", "https://tal-bank-j87e.vercel.app");
+    res.header("Access-Control-Allow-Origin", "https://fameuntold-v6c3.vercel.app");
     res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
     res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
     res.header("Access-Control-Allow-Credentials", "true");
