@@ -77,11 +77,11 @@ export default function OwnerSpeech() {
         initial="hidden"
         whileInView="visible"
         viewport={{ once: false, amount: 0.3 }}
-        className="relative flex justify-center items-center"
+        className="relative flex mb-9 justify-center items-center"
       >
 
         {/* Background shape */}
-        <div className="absolute w-48 sm:w-64 md:w-[360px] lg:w-[460px] h-72 sm:h-80 md:h-[480px] lg:h-[520px] bg-purple-400 polygon -bottom-5 md:-bottom-10 right-1/2 translate-x-1/2 md:translate-x-0 md:right-10"></div>
+        <div className="absolute w-48 sm:w-64 md:w-[360px] lg:w-[460px] h-72 sm:h-80 md:h-[480px] lg:h-[520px] bg-purple-400 polygon -bottom-5 md:-bottom-10 right-2 translate-x-1/2 md:translate-x-0 md:right-10"></div>
 
         {/* Image */}
         <motion.div

@@ -11,10 +11,12 @@ import {
   FaUsers
 } from "react-icons/fa";
 import logo from "../assets/logo.png";
-import axios from "axios"
+import axios from "axios";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
+
+  const [sidebarOpen, setSidebarOpen] = useState(false); // ✅ NEW
 
   const [activeTab, setActiveTab] = useState("news");
   const [data, setData] = useState({ news: [], events: [], media: [] });
@@ -42,8 +44,11 @@ export default function AdminDashboard() {
   useEffect(() => {
     fetchData();
     fetchUsers();
+    fetchContacts();
+    fetchSubscribers();
   }, []);
 
+  // ================= FETCH =================
   const fetchData = async () => {
     const news = await fetch("https://fameuntold.vercel.app/api/news").then(res => res.json());
     const events = await fetch("https://fameuntold.vercel.app/api/events").then(res => res.json());
@@ -67,6 +72,27 @@ export default function AdminDashboard() {
     }
   };
 
+  const fetchContacts = async () => {
+    try {
+      const { data } = await axios.get("https://fameuntold.vercel.app/api/contact/get-contact");
+      setContacts(data);
+      setLoading(false);
+    } catch {
+      setLoading(false);
+    }
+  };
+
+  const fetchSubscribers = async () => {
+    try {
+      const { data } = await axios.get("https://fameuntold.vercel.app/api/newsletter/all");
+      setSubscribers(data);
+      setLoadingSubscribers(false);
+    } catch {
+      setLoadingSubscribers(false);
+    }
+  };
+
+  // ================= ACTIONS =================
   const handleLogout = () => {
     localStorage.clear();
     navigate("/login");
@@ -107,29 +133,14 @@ export default function AdminDashboard() {
     fetchUsers();
   };
 
-  const chartData = [
-    { name: "Users", value: users.length },
-    { name: "News", value: data.news.length },
-    { name: "Events", value: data.events.length },
-    { name: "Media", value: data.media.length },
-  ];
-
+  // ================= STATES =================
   const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
 
   const [userSearch, setUserSearch] = useState("");
-  const [contactSearch, setContactSearch] = useState("");
-
   const filteredUsers = users.filter(user =>
     user.name.toLowerCase().includes(userSearch.toLowerCase()) ||
     user.email.toLowerCase().includes(userSearch.toLowerCase())
-  );
-
-  const filteredContacts = contacts.filter(contact =>
-    contact.name.toLowerCase().includes(contactSearch.toLowerCase()) ||
-    contact.email.toLowerCase().includes(contactSearch.toLowerCase()) ||
-    contact.message.toLowerCase().includes(contactSearch.toLowerCase())
   );
 
   const [subscribers, setSubscribers] = useState([]);
@@ -140,83 +151,79 @@ export default function AdminDashboard() {
     sub.email.toLowerCase().includes(subscriberSearch.toLowerCase())
   );
 
-  const fetchContacts = async () => {
-    try {
-      const { data } = await axios.get("https://fameuntold.vercel.app/api/contact/get-contact");
-      setContacts(data);
-      setLoading(false);
-    } catch (err) {
-      console.error(err);
-      setError("Failed to fetch contacts.");
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchContacts();
-  }, []);
-
-  const fetchSubscribers = async () => {
-    try {
-      const { data } = await axios.get("https://fameuntold.vercel.app/api/newsletter/all");
-      setSubscribers(data);
-      setLoadingSubscribers(false);
-    } catch (err) {
-      console.error(err);
-      setLoadingSubscribers(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchSubscribers();
-  }, [])
-
-  if (loading) return <p className="p-6">Loading messages...</p>;
-  if (error) return <p className="p-6 text-red-500">{error}</p>;
-  if (contacts.length === 0) return <p className="p-6 text-gray-600">No messages available.</p>;
+  const chartData = [
+    { name: "Users", value: users.length },
+    { name: "News", value: data.news.length },
+    { name: "Events", value: data.events.length },
+    { name: "Media", value: data.media.length },
+  ];
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-gray-100">
+    <div className="flex min-h-screen bg-gray-100">
+
+      {/* MOBILE BUTTON */}
+      <div className="md:hidden fixed top-4 left-4 z-[9999]">
+        <button
+          onClick={() => setSidebarOpen(true)}
+          className="bg-purple-700 text-white p-3 rounded-full"
+        >
+          ☰
+        </button>
+      </div>
+
+      {/* OVERLAY */}
+      {sidebarOpen && (
+        <div
+          onClick={() => setSidebarOpen(false)}
+          className="fixed inset-0 bg-black/50 z-[9998] md:hidden"
+        />
+      )}
 
       {/* SIDEBAR */}
-      <div className="w-full md:w-64 bg-gray-900 text-white p-4 md:p-6 flex flex-col">
+      <div className={`
+        fixed md:static top-0 left-0 h-full w-64 bg-gray-900 text-white p-6 flex flex-col
+        transform transition-all duration-300 z-[9999]
+        ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
+        md:translate-x-0
+      `}>
 
-        <div className="w-full flex items-center mb-6">
-          <img className="w-16 h-14 filter brightness-0 invert" src={logo} alt="" />
-          <h6 className="text-purple-50 w-full font-bold ml-2">FAME UNTOLD</h6>
+        <div className="md:hidden flex justify-end mb-4">
+          <button onClick={() => setSidebarOpen(false)} className="text-2xl">✕</button>
         </div>
 
-        <div className="space-y-2 flex md:block overflow-x-auto md:overflow-visible">
+        <div className="flex items-center mb-6">
+          <img className="w-16 h-14 filter brightness-0 invert" src={logo} alt="" />
+          <h6 className="font-bold">FAME UNTOLD</h6>
+        </div>
+
+        <div className="space-y-2">
           {menuItems.map((item) => (
             <button
               key={item.key}
-              onClick={() => setActiveTab(item.key)}
-              className={`flex items-center gap-3 whitespace-nowrap w-full p-3 rounded-lg ${
+              onClick={() => {
+                setActiveTab(item.key);
+                setSidebarOpen(false);
+              }}
+              className={`flex items-center gap-3 w-full p-3 rounded-lg ${
                 activeTab === item.key ? "bg-purple-600" : "hover:bg-gray-700"
               }`}
             >
-              <span>{item.icon}</span>
-              <span>{item.label}</span>
+              {item.icon} {item.label}
             </button>
           ))}
         </div>
 
-        <button
-          onClick={handleLogout}
-          className="mt-auto bg-red-500 p-3 rounded-lg mt-6"
-        >
+        <button onClick={handleLogout} className="mt-auto bg-red-500 p-3 rounded-lg">
           Logout
         </button>
       </div>
 
       {/* MAIN */}
-      <div className="flex-1 p-4 md:p-6">
+      <div className="flex-1 p-6 md:ml-64">
 
-        <h1 className="text-xl md:text-2xl font-bold mb-6">Admin Dashboard</h1>
+        <h1 className="text-2xl font-bold mb-6">Admin Dashboard</h1>
 
-        {/* CHARTS */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-10">
-
+        <div className="grid md:grid-cols-2 gap-6 mb-10">
           <div className="bg-white p-6 rounded-2xl shadow">
             <ResponsiveContainer width="100%" height={250}>
               <BarChart data={chartData}>
@@ -243,115 +250,7 @@ export default function AdminDashboard() {
               </PieChart>
             </ResponsiveContainer>
           </div>
-
         </div>
-
-        {/* FORM */}
-        {activeTab !== "users" && (
-          <div className="bg-white p-6 rounded-2xl shadow mb-10">
-            <h2 className="font-bold mb-4 capitalize">Add {activeTab}</h2>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              <input placeholder="Title" value={form.title}
-                onChange={(e) => setForm({ ...form, title: e.target.value })}
-                className="border p-2 rounded" />
-
-              <input placeholder="Description" value={form.description}
-                onChange={(e) => setForm({ ...form, description: e.target.value })}
-                className="border p-2 rounded" />
-
-              {activeTab === "media" && (
-                <input placeholder="Link" value={form.link}
-                  onChange={(e) => setForm({ ...form, link: e.target.value })}
-                  className="border p-2 rounded" />
-              )}
-
-              <input type="file" onChange={handleImage} />
-            </div>
-
-            {preview && <img src={preview} className="w-32 max-w-full mt-3 rounded" />}
-
-            <button onClick={handleSubmit}
-              className="bg-purple-700 text-white px-4 py-2 mt-4 rounded w-full md:w-auto">
-              Add
-            </button>
-          </div>
-        )}
-
-        {/* USERS TABLE */}
-        {activeTab === "users" && (
-          <div className="bg-gray-300 p-6 rounded-2xl shadow">
-
-            <h2 className="text-3xl font-bold mb-4">Registered Users</h2>
-
-            <input
-              placeholder="Search users..."
-              value={userSearch}
-              onChange={(e) => setUserSearch(e.target.value)}
-              className="border outline-0 border-gray-200 p-2 mb-4 w-full rounded"
-            />
-
-            <div className="overflow-x-auto">
-              <table className="w-full text-left min-w-[700px]">
-
-                <thead>
-                  <tr className="border-b bg-purple-500">
-                    <th className="p-2">Name</th>
-                    <th className="p-2">Email</th>
-                    <th className="p-2">Role</th>
-                    <th className="p-2">Phone</th>
-                    <th className="p-2">Location</th>
-                    <th className="p-2">Message</th>
-                    <th className="p-2">Actions</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {filteredUsers.map((user) => (
-                    <tr key={user._id} className="border-b hover:bg-gray-50">
-                      <td className="p-2">{user.name}</td>
-                      <td className="p-2">{user.email}</td>
-                      <td className="p-2">{user.role}</td>
-                      <td className="p-2">{user.phone || "-"}</td>
-                      <td className="p-2">{user.location || "-"}</td>
-                      <td className="p-2">{user.message || "-"}</td>
-
-                      <td className="p-2 space-x-2">
-                        <button onClick={() => setViewUser(user)} className="bg-green-500 text-white px-2 py-1 rounded">View</button>
-                        <button onClick={() => deleteUser(user._id)} className="bg-red-500 text-white px-2 py-1 rounded">Delete</button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-
-              </table>
-            </div>
-          </div>
-        )}
-
-        {/* USER MODAL */}
-        {viewUser && (
-          <div className="fixed inset-0 bg-black/50 flex justify-center items-center">
-
-            <div className="bg-white p-6 rounded-2xl w-[90%] max-w-md">
-
-              <h2 className="font-bold mb-3">User Details</h2>
-
-              <p>Name: {viewUser.name}</p>
-              <p>Email: {viewUser.email}</p>
-              <p>Role: {viewUser.role}</p>
-
-              <button
-                onClick={() => setViewUser(null)}
-                className="bg-gray-800 text-white px-4 py-2 mt-3 rounded"
-              >
-                Close
-              </button>
-
-            </div>
-
-          </div>
-        )}
 
       </div>
     </div>
