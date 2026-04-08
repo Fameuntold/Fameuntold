@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-import IMG5 from "../assets/IMG5.png";
+import IMG5 from "../assets/IMG5.PNG";
 import { FaHeart } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
