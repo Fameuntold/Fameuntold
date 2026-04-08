@@ -125,159 +125,205 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
+   <div className="flex min-h-screen bg-gray-100">
 
-      {/* MOBILE BUTTON */}
-      <button
-        onClick={() => setSidebarOpen(true)}
-        className="md:hidden fixed top-4 left-4 z-50 bg-purple-700 text-white p-3 rounded-full"
-      >
-        ☰
-      </button>
+  {/* MOBILE MENU BUTTON */}
+  <button
+    onClick={() => setSidebarOpen(true)}
+    className="md:hidden fixed top-4 left-4 z-50 bg-purple-700 text-white p-3 rounded-full"
+  >
+    ☰
+  </button>
 
-      {/* OVERLAY */}
-      {sidebarOpen && (
-        <div
-          onClick={() => setSidebarOpen(false)}
-          className="fixed inset-0 bg-black/50 z-40"
-        />
-      )}
+  {/* OVERLAY */}
+  {sidebarOpen && (
+    <div
+      onClick={() => setSidebarOpen(false)}
+      className="fixed inset-0 bg-black/40 z-40 md:hidden"
+    />
+  )}
 
-      {/* SIDEBAR */}
-      <div className={`
-        fixed md:static z-50 bg-gray-900 text-white w-64 h-full p-6 flex flex-col
-        transform transition-all duration-300
-        ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
-        md:translate-x-0
-      `}>
-        <button className="md:hidden mb-4" onClick={() => setSidebarOpen(false)}>✕</button>
+  {/* SIDEBAR */}
+  <div
+    className={`
+      fixed md:static top-0 left-0 h-full w-64 bg-gray-900 text-white p-4 flex flex-col
+      transform transition-all duration-300 z-50
+      ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
+      md:translate-x-0
+    `}
+  >
+    {/* CLOSE */}
+    <div className="md:hidden flex justify-end mb-4">
+      <button onClick={() => setSidebarOpen(false)}>✕</button>
+    </div>
 
-        <div className="flex items-center mb-6">
-          <img src={logo} className="w-12 invert" />
-          <h2 className="ml-2 font-bold">Admin</h2>
-        </div>
-
-        {menuItems.map(item => (
-          <button
-            key={item.key}
-            onClick={() => {
-              setActiveTab(item.key);
-              setSidebarOpen(false);
-            }}
-            className={`p-3 rounded ${activeTab === item.key ? "bg-purple-600" : ""}`}
-          >
-            {item.icon} {item.label}
-          </button>
-        ))}
-
-        <button onClick={handleLogout} className="mt-auto bg-red-500 p-3 rounded">
-          Logout
+    {/* MENU */}
+    <div className="space-y-2 mt-4">
+      {menuItems.map((item) => (
+        <button
+          key={item.key}
+          onClick={() => {
+            setActiveTab(item.key);
+            setSidebarOpen(false);
+          }}
+          className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left ${
+            activeTab === item.key
+              ? "bg-purple-600"
+              : "hover:bg-gray-700"
+          }`}
+        >
+          <span className="text-lg">{item.icon}</span>
+          <span className="text-sm">{item.label}</span>
         </button>
-      </div>
+      ))}
+    </div>
 
-      {/* MAIN */}
-      <div className="flex-1 p-6 md:ml-64">
+    <button
+      onClick={handleLogout}
+      className="mt-auto bg-red-500 p-3 rounded-lg"
+    >
+      Logout
+    </button>
+  </div>
 
-        <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
+  {/* MAIN CONTENT */}
+  <div className="flex-1 p-4 md:p-6 md:ml-64">
 
+    {/* TITLE */}
+    <h1 className="text-xl md:text-2xl font-bold mb-4">
+      Admin Dashboard
+    </h1>
+
+    {/* ================= DASHBOARD (DEFAULT) ================= */}
+    {activeTab === "news" && (
+      <>
         {/* CHARTS */}
-        <div className="grid md:grid-cols-2 gap-6 mb-6">
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={chartData}>
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="value">
-                {chartData.map((_, i) => <Cell key={i} fill={colors[i]} />)}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
 
-          <ResponsiveContainer width="100%" height={250}>
-            <PieChart>
-              <Pie data={chartData} dataKey="value" outerRadius={80}>
-                {chartData.map((_, i) => <Cell key={i} fill={colors[i]} />)}
-              </Pie>
-            </PieChart>
-          </ResponsiveContainer>
+          <div className="bg-white p-4 rounded-xl shadow">
+            <ResponsiveContainer width="100%" height={250}>
+              <BarChart data={chartData}>
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="value" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+
+          <div className="bg-white p-4 rounded-xl shadow">
+            <ResponsiveContainer width="100%" height={250}>
+              <PieChart>
+                <Pie data={chartData} dataKey="value" outerRadius={80} />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
         </div>
 
         {/* FORM */}
-        {["news", "events", "media"].includes(activeTab) && (
-          <div className="bg-white p-4 rounded shadow mb-6">
-            <input placeholder="Title" className="border p-2 w-full mb-2"
-              onChange={e => setForm({ ...form, title: e.target.value })} />
+        <div className="bg-white p-4 rounded-xl shadow mb-6">
+          <input
+            placeholder="Title"
+            className="w-full border p-2 mb-2"
+            onChange={(e) =>
+              setForm({ ...form, title: e.target.value })
+            }
+          />
 
-            <textarea placeholder="Description" className="border p-2 w-full mb-2"
-              onChange={e => setForm({ ...form, description: e.target.value })} />
+          <textarea
+            placeholder="Description"
+            className="w-full border p-2 mb-2"
+            onChange={(e) =>
+              setForm({ ...form, description: e.target.value })
+            }
+          />
 
-            <input placeholder="Link" className="border p-2 w-full mb-2"
-              onChange={e => setForm({ ...form, link: e.target.value })} />
+          <input
+            type="file"
+            onChange={handleImage}
+            className="mb-2"
+          />
 
-            <input type="file" onChange={handleImage} />
-            {preview && <img src={preview} className="w-32 mt-2" />}
+          {preview && (
+            <img src={preview} className="w-24 mb-2" />
+          )}
 
-            <button onClick={handleSubmit} className="bg-purple-600 text-white p-2 mt-2">
-              Add
-            </button>
-          </div>
-        )}
+          <button
+            onClick={handleSubmit}
+            className="bg-purple-600 text-white px-4 py-2 rounded"
+          >
+            Add
+          </button>
+        </div>
 
-        {/* LIST */}
-        {["news", "events", "media"].includes(activeTab) && (
-          data[activeTab].map(item => (
-            <div key={item._id} className="bg-white p-3 mb-2 flex justify-between">
-              <span>{item.title}</span>
-              <button onClick={() => deleteItem(item._id)} className="text-red-500">Delete</button>
-            </div>
-          ))
-        )}
+        {/* TABLE */}
+        <div className="bg-white p-4 rounded-xl shadow overflow-x-auto">
+          <table className="min-w-full text-sm">
+            <thead>
+              <tr className="border-b">
+                <th className="p-2 text-left">Title</th>
+                <th className="p-2">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.news.map((item) => (
+                <tr key={item._id} className="border-b">
+                  <td className="p-2">{item.title}</td>
+                  <td className="p-2">
+                    <button
+                      onClick={() => deleteItem(item._id)}
+                      className="text-red-500"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </>
+    )}
 
-        {/* USERS */}
-        {activeTab === "users" && (
-          <>
-            <input
-              placeholder="Search user"
-              className="border p-2 mb-4"
-              onChange={e => setUserSearch(e.target.value)}
-            />
+    {/* ================= USERS ================= */}
+    {activeTab === "users" && (
+      <div className="bg-white p-4 rounded-xl shadow overflow-x-auto">
 
-            {filteredUsers.map(user => (
-              <div key={user._id} className="bg-white p-3 mb-2 flex justify-between">
-                <span>{user.email}</span>
-                <button onClick={() => deleteUser(user._id)} className="text-red-500">
-                  Delete
-                </button>
-              </div>
+        <input
+          placeholder="Search user"
+          className="border p-2 mb-4 w-full"
+          onChange={(e) => setUserSearch(e.target.value)}
+        />
+
+        <table className="min-w-full text-sm">
+          <thead>
+            <tr className="border-b">
+              <th className="p-2 text-left">Email</th>
+              <th className="p-2">Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {filteredUsers.map((user) => (
+              <tr key={user._id} className="border-b">
+                <td className="p-2">{user.email}</td>
+                <td className="p-2">
+                  <button
+                    onClick={() => deleteUser(user._id)}
+                    className="text-red-500"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
             ))}
-          </>
-        )}
-
-        {/* CONTACTS */}
-        {activeTab === "contacts" && contacts.map(c => (
-          <div key={c._id} className="bg-white p-3 mb-2">
-            {c.email} - {c.message}
-          </div>
-        ))}
-
-        {/* SUBSCRIBERS */}
-        {activeTab === "subscribers" && (
-          <>
-            <input
-              placeholder="Search subscriber"
-              className="border p-2 mb-4"
-              onChange={e => setSubscriberSearch(e.target.value)}
-            />
-
-            {filteredSubscribers.map(sub => (
-              <div key={sub._id} className="bg-white p-3 mb-2">
-                {sub.email}
-              </div>
-            ))}
-          </>
-        )}
+          </tbody>
+        </table>
 
       </div>
-    </div>
+    )}
+
+  </div>
+</div>
   );
 }
