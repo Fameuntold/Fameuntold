@@ -245,6 +245,48 @@ const Navbar = () => {
                             <Link to="/" onClick={() => setMobileMenu(false)}>Home</Link>
                         </li>
 
+                        <div className="relative" onMouseEnter={() => setOpenAbout(true)} onMouseLeave={() => setOpenAbout(false)}>
+                            <span className="cursor-pointer hover:text-purple-700 flex text-sm md:text-xl items-center gap-1"> About <FiChevronDown /> </span>
+                            <div className={`absolute left-1/2 -translate-x-1/2 top-full p-6 transition-all duration-300 bg-gray-50 shadow-xl rounded-b-xl grid grid-cols-2 gap-6 w-[700px] ${openAbout ? "opacity-100 translate-y-0 z-[9999]" : "opacity-0 translate-y-4 pointer-events-none"}`}>
+                                <div>
+                                    <h3 className="font-semibold text-purple-900  mb-2">About Us</h3>
+                                    <ul className="space-y-2 text-sm text-gray-600">
+                                        <li onClick={() => navigate("/our-story")} className="hover:text-purple-700 cursor-pointer">Our Story</li>
+                                        <li onClick={() => navigate("/mission")} className="hover:text-purple-700 cursor-pointer">Mission & Vision</li>
+                                        <li onClick={() => navigate("/leader")} className="hover:text-purple-700 cursor-pointer">Leadership</li>
+                                        <li onClick={() => navigate("/objectives")} className="hover:text-purple-700 cursor-pointer">Aims & Objectives</li>
+                                    </ul>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        {/* PROGRAMS */}
+                        <div className="relative" onMouseEnter={() => setOpenPrograms(true)} onMouseLeave={() => setOpenPrograms(false)}>
+                            <span className="flex items-center text-sm md:text-xl gap-1 cursor-pointer"> Programs <FiChevronDown /> </span>
+                            <div
+                                className={`absolute left-1/2 -translate-x-1/2 top-full p-6 transition-all duration-300 bg-gray-50 shadow-xl rounded-b-xl grid grid-cols-3 gap-6 w-[900px] ${openPrograms ? "opacity-100 translate-y-0 z-[9999]" : "opacity-0 translate-y-4 pointer-events-none"
+                                    }`}
+                            >
+                                <div>
+                                    <h3 className="font-semibold text-purple-900 mb-2">Our Programs</h3>
+                                    <ul className="space-y-2 text-sm text-gray-600">
+                                        <li onClick={() => navigate("/mentorship")} className="hover:text-purple-700 cursor-pointer">Mentorship</li>
+                                        <li onClick={() => navigate("/worship")} className="hover:text-purple-700 cursor-pointer">Worship</li>
+                                        <li onClick={() => navigate("/leadershipcapacity")} className="hover:text-purple-700 cursor-pointer">Leadership</li>
+                                        <li onClick={() => navigate("/counselling")} className="hover:text-purple-700 cursor-pointer">Counselling</li>
+                                        <li onClick={() => navigate("/talent")} className="hover:text-purple-700 cursor-pointer">Talent</li>
+                                        <li onClick={() => navigate("/workshop")} className="hover:text-purple-700 cursor-pointer">Workshops</li>
+                                        <li onClick={() => navigate("/mentorpage")} className="hover:text-purple-700 cursor-pointer">Mentorship</li>
+                                        <li onClick={() => navigate("/volunteer-page")} className="hover:text-purple-700 cursor-pointer">Volunteer</li>
+                                    </ul>
+                                </div>
+
+
+
+                            </div>
+                        </div>
+
                         <li>
                             <Link to="/event-page" onClick={() => setMobileMenu(false)}>Events</Link>
                         </li>
