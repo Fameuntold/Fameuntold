@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import IMG10 from "../assets/IMG10.png";
-import IMG11 from "../assets/IMG11.png"; // add more images if you have
-import IMG12 from "../assets/IMG12.png";
+import IMG10 from "../assets/IMG10.PNG";
+import IMG11 from "../assets/IMG11.PNG"; // add more images if you have
+import IMG12 from "../assets/IMG12.PNG";
 import { useNavigate } from "react-router-dom";
 
 const slides = [
