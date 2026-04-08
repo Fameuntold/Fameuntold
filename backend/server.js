@@ -39,6 +39,8 @@ app.get("/", (req, res) => {
   res.send("API running...");
 });
 
-app.listen(process.env.PORT, () =>
-  console.log(`Server running on port ${process.env.PORT}`)
-);
+
+//  Vercel handler
+export default function handler(req, res) {
+  return app(req, res);
+}
