@@ -105,7 +105,7 @@ const Navbar = () => {
             )}
 
             {/* MAIN NAV */}
-            <div className={`bg-purple-50 px-4 md:px-9 py-3 flex md:justify-between items-center shadow-md ${scrolled ? "fixed top-0 w-full z-[9999]" : ""}`}>
+            <div className={`bg-purple-50 px-4 md:px-9 py-3 flex justify-between items-center shadow-md ${scrolled ? "fixed top-0 w-full z-[9999]" : ""}`}>
 
                 {/* LOGO */}
                 <div className="flex items-center gap-2">

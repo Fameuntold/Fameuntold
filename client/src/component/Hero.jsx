@@ -53,7 +53,7 @@ export default function Hero() {
   const slide = slides[current];
 
   return (
-    <section className="relative min-h-[80vh] md:min-h-[90vh] overflow-hidden bg-black">
+    <section className="relative min-h-[60vh] md:min-h-[90vh] overflow-hidden bg-black">
       {/* BACKGROUND IMAGE */}
       <div
         key={current}
