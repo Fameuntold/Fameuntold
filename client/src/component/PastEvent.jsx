@@ -3,10 +3,10 @@ import { motion } from "framer-motion";
 import { GiChainedArrowHeads } from "react-icons/gi";
 
 // IMAGES
-import IMG1 from "../assets/IMG1.png";
-import IMG2 from "../assets/IMG2.png";
-import IMG3 from "../assets/IMG3.png";
-import IMG4 from "../assets/IMG4.png";
+import IMG1 from "../assets/IMG1.PNG";
+import IMG2 from "../assets/IMG2.PNG";
+import IMG3 from "../assets/IMG3.PNG";
+import IMG4 from "../assets/IMG4.PNG";
 import pics3 from "../assets/pics3.jpeg";
 
 // VIDEOS
