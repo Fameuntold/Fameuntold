@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import IMG7 from "../assets/IMG7.PNG";
-import IMG2 from "../assets/IMG2.Webp";
+import IMG2 from "../assets/IMG2.PNG";
 import IMG13 from "../assets/IMG13.PNG";
 import { CgCross } from "react-icons/cg";
 import { useNavigate } from "react-router-dom";
