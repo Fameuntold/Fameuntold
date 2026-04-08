@@ -196,11 +196,11 @@ const Navbar = () => {
                                 <div className="absolute right-0 mt-5 py-3 bg-purple-50 shadow-lg rounded-b-lg w-60 z-9998">
 
 
-                                    <button onClick={()=>navigate('/account-page')} className="w-full px-4 cursor-pointer flex items-center gap-3 text-left p-2 hover:bg-purple-100 ">
+                                    <button onClick={() => navigate('/account-page')} className="w-full px-4 cursor-pointer flex items-center gap-3 text-left p-2 hover:bg-purple-100 ">
                                         👤 My Profile
                                     </button>
                                     <button onClick={handleLogout} className="w-[70%] ml-9 my-5 text-white font-bold cursor-pointer hover:bg-purple-400 p-2 flex items-center text-center justify-center bg-purple-500 gap-3">
-                                      
+
                                         Logout
                                     </button>
                                 </div>
@@ -262,10 +262,14 @@ const Navbar = () => {
                             </button>
                             {openPrograms && (
                                 <ul className="pl-4 mt-2 space-y-2 text-base font-normal">
-                                    <li onClick={() => { navigate("/youth"); setMobileMenu(false); }}>Youth Empowerment</li>
-                                    <li onClick={() => { navigate("/leadership"); setMobileMenu(false); }}>Leadership Training</li>
-                                    <li onClick={() => { navigate("/outreach"); setMobileMenu(false); }}>Community Outreach</li>
-                                    <li onClick={() => { navigate("/mentorship"); setMobileMenu(false); }}>Mentorship Program</li>
+                                    <li onClick={() => navigate("/mentorship")} className="hover:text-purple-700 cursor-pointer">Mentorship</li>
+                                    <li onClick={() => navigate("/worship")} className="hover:text-purple-700 cursor-pointer">Worship</li>
+                                    <li onClick={() => navigate("/leadershipcapacity")} className="hover:text-purple-700 cursor-pointer">Leadership</li>
+                                    <li onClick={() => navigate("/counselling")} className="hover:text-purple-700 cursor-pointer">Counselling</li>
+                                    <li onClick={() => navigate("/talent")} className="hover:text-purple-700 cursor-pointer">Talent</li>
+                                    <li onClick={() => navigate("/workshop")} className="hover:text-purple-700 cursor-pointer">Workshops</li>
+                                    <li onClick={() => navigate("/mentorpage")} className="hover:text-purple-700 cursor-pointer">Mentorship</li>
+                                    <li onClick={() => navigate("/volunteer-page")} className="hover:text-purple-700 cursor-pointer">Volunteer</li>
                                 </ul>
                             )}
                         </li>
@@ -288,10 +292,17 @@ const Navbar = () => {
                                 </li>
                             </>
                         ) : (
-                            <li className="mt-4 flex flex-col gap-2">
-                                <button onClick={() => { navigate("/login"); setMobileMenu(false); }} className="p-2 bg-purple-900 text-white rounded">Login</button>
-                                <button onClick={() => { navigate("/register"); setMobileMenu(false); }} className="p-2 bg-purple-900 text-white rounded">Register</button>
-                            </li>
+                            <div className="absolute right-0 mt-5 py-3 bg-purple-50 shadow-lg rounded-b-lg w-60 z-9998">
+
+
+                                <button onClick={() => navigate('/account-page')} className="w-full px-4 cursor-pointer flex items-center gap-3 text-left p-2 hover:bg-purple-100 ">
+                                    👤 My Profile
+                                </button>
+                                <button onClick={handleLogout} className="w-[70%] ml-9 my-5 text-white font-bold cursor-pointer hover:bg-purple-400 p-2 flex items-center text-center justify-center bg-purple-500 gap-3">
+
+                                    Logout
+                                </button>
+                            </div>
                         )}
                     </ul>
                 </div>
