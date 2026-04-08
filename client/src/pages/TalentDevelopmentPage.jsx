@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import IMG16 from "../assets/IMG16.png"; // update path as needed
+import IMG16 from "../assets/IMG16.PNG"; // update path as needed
 
 export default function TalentDevelopmentPage() {
     const navigate = useNavigate();

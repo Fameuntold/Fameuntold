@@ -1,5 +1,5 @@
 import React from "react";
-import ceo2 from "../assets/ceo2.PNG";
+import ceo2 from "../assets/ceo2.png";
 import IMG16 from "../assets/IMG16.PNG";
 import { useNavigate } from "react-router-dom";
 
