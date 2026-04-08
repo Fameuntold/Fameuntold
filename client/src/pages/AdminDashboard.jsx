@@ -46,9 +46,9 @@ export default function AdminDashboard() {
 
   // ================= FETCH =================
   const fetchData = async () => {
-    const news = await fetch("https://fameuntold-85z3.vercel.app/api/news").then(res => res.json());
-    const events = await fetch("https://fameuntold-85z3.vercel.app/api/events").then(res => res.json());
-    const media = await fetch("https://fameuntold-85z3.vercel.app/api/media").then(res => res.json());
+    const news = await fetch("https://fameuntold.vercel.app/api/news").then(res => res.json());
+    const events = await fetch("https://fameuntold.vercel.app/api/events").then(res => res.json());
+    const media = await fetch("https://fameuntold.vercel.app/api/media").then(res => res.json());
 
     setData({ news, events, media });
   };
@@ -57,7 +57,7 @@ export default function AdminDashboard() {
     try {
       const token = localStorage.getItem("token");
 
-      const res = await fetch("hhttps://fameuntold-85z3.vercel.app/api/admin/users", {
+      const res = await fetch("https://fameuntold.vercel.app/api/admin/users", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -87,7 +87,7 @@ export default function AdminDashboard() {
     formData.append("link", form.link);
     if (image) formData.append("image", image);
 
-    await fetch(`https://fameuntold-85z3.vercel.app/api/${activeTab}`, {
+    await fetch(`https://fameuntold.vercel.app/api/${activeTab}`, {
       method: "POST",
       body: formData,
     });
@@ -105,7 +105,7 @@ export default function AdminDashboard() {
       description: item.description || "",
       link: item.link || "",
     });
-    setPreview(item.image ? `https://fameuntold-85z3.vercel.app/${item.image}` : "");
+    setPreview(item.image ? `https://fameuntold.vercel.app/${item.image}` : "");
     setEditModal(true);
   };
 
@@ -116,7 +116,7 @@ export default function AdminDashboard() {
     formData.append("link", form.link);
     if (image) formData.append("image", image);
 
-    await fetch(`https://fameuntold-85z3.vercel.app/api/${activeTab}/${currentItem._id}`, {
+    await fetch(`https://fameuntold.vercel.app/api/${activeTab}/${currentItem._id}`, {
       method: "PUT",
       body: formData,
     });
@@ -127,7 +127,7 @@ export default function AdminDashboard() {
   };
 
   const handleDelete = async (id) => {
-    await fetch(`https://fameuntold-85z3.vercel.app/api/${activeTab}/${id}`, {
+    await fetch(`https://fameuntold.vercel.app/api/${activeTab}/${id}`, {
       method: "DELETE",
     });
     fetchData();
@@ -136,7 +136,7 @@ export default function AdminDashboard() {
   const deleteUser = async (id) => {
     const token = localStorage.getItem("token");
 
-    await fetch(`https://fameuntold-85z3.vercel.app/api/admin/users/${id}`, {
+    await fetch(`https://fameuntold.vercel.app/api/admin/users/${id}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -185,7 +185,7 @@ export default function AdminDashboard() {
 
   const fetchContacts = async () => {
     try {
-      const { data } = await axios.get("https://fameuntold-85z3.vercel.app/api/contact/get-contact");
+      const { data } = await axios.get("https://fameuntold.vercel.app/api/contact/get-contact");
       setContacts(data);
       setLoading(false);
     } catch (err) {
@@ -203,7 +203,7 @@ export default function AdminDashboard() {
   // Fetch subscribers
   const fetchSubscribers = async () => {
     try {
-      const { data } = await axios.get("https://fameuntold-85z3.vercel.app/api/newsletter/all");
+      const { data } = await axios.get("https://fameuntold.vercel.app/api/newsletter/all");
       setSubscribers(data);
       setLoadingSubscribers(false);
     } catch (err) {

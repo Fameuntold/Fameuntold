@@ -62,7 +62,7 @@ const EventCard = ({ title, description, image }) => (
       src={
         image?.startsWith("http")
           ? image
-          : `https://fameuntold-85z3.vercel.app${image}`
+          : `https://fameuntold.vercel.app/${image}`
       }
       alt={title}
       whileHover={{ scale: 1.05 }}
@@ -90,7 +90,7 @@ export default function EventsPage() {
   const fetchEvents = async () => {
     try {
       const res = await axios.get(
-        "https://fameuntold-85z3.vercel.app/api/events/getEvents"
+        "https://fameuntold.vercel.app/api/events/getEvents"
       );
       setEvents(res.data);
     } catch (err) {

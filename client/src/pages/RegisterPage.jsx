@@ -67,7 +67,7 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      const res = await fetch("https://fameuntold-85z3.vercel.app/api/auth/register", {
+      const res = await fetch("https://fameuntold.vercel.app/api/auth/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

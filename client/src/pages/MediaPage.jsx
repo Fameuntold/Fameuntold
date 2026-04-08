@@ -31,7 +31,7 @@ export default function MediaPage() {
   const fetchEvents = async () => {
     try {
       const res = await axios.get(
-        "https://fameuntold-85z3.vercel.app/api/media/getMedia"
+        "https://fameuntold.vercel.app/api/media/getMedia"
       );
       setEvents(res.data);
     } catch (err) {
@@ -83,7 +83,7 @@ export default function MediaPage() {
                     backgroundImage: `url(${
                       event.image?.startsWith("http")
                         ? event.image
-                        : `https://fameuntold-85z3.vercel.app${event.image}`
+                        : `https://fameuntold.vercel.app/${event.image}`
                     })`,
                   }}
                 />
@@ -149,7 +149,7 @@ export default function MediaPage() {
                       backgroundImage: `url(${
                         event.image?.startsWith("http")
                           ? event.image
-                          : `https://fameuntold-85z3.vercel.app${event.image}`
+                          : `https://fameuntold.vercel.app/${event.image}`
                       })`,
                     }}
                   />

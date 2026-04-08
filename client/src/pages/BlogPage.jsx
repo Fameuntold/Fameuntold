@@ -17,7 +17,7 @@ export default function BlogPage() {
   const fetchPosts = async () => {
     try {
       const res = await axios.get(
-        "https://fameuntold-85z3.vercel.app/api/news/getNews"
+        "https://fameuntold.vercel.app/api/news/getNews"
       );
       setPosts(res.data);
     } catch (err) {
@@ -91,7 +91,7 @@ export default function BlogPage() {
                     backgroundImage: `url(${
                       post.image?.startsWith("http")
                         ? post.image
-                        : `https://fameuntold-85z3.vercel.app${post.image}`
+                        : `https://fameuntold.vercel.app/${post.image}`
                     })`,
                   }}
                 />

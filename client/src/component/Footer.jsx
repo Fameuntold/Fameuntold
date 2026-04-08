@@ -50,7 +50,7 @@ export default function Footer() {
     e.preventDefault();
 
     try {
-      const res = await axios.post("https://fameuntold-85z3.vercel.app/api/newsletter/subscribe", { email });
+      const res = await axios.post("https://fameuntold.vercel.app/api/newsletter/subscribe", { email });
       setMessage(res.data.message);
       setEmail("");
     } catch (err) {
