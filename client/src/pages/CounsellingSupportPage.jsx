@@ -50,7 +50,7 @@ export default function CounsellingSupportPage() {
 
                     {/* Intro */}
                     <div className="ml-0 md:ml-[8rem] mb-10">
-                        <p className="text-gray-700 text-center w-[90%] leading-relaxed">
+                        <p className="text-gray-700 text-start md:text-center w-[90%] leading-relaxed">
                             At our ministry, we believe that everyone deserves care, understanding, and support
                             no matter what they are going through. Life can bring challenges such as stress, grief,
                             relationship struggles, or spiritual doubts, and we are here to help.
