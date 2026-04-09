@@ -29,8 +29,18 @@ export default function AdminDashboard() {
   const [editModal, setEditModal] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
 
-  const [search, setSearch] = useState("");
   const [viewUser, setViewUser] = useState(null);
+
+  const [userSearch, setUserSearch] = useState("");
+  const [contactSearch, setContactSearch] = useState("");
+  const [subscriberSearch, setSubscriberSearch] = useState("");
+
+  const [contacts, setContacts] = useState([]);
+  const [subscribers, setSubscribers] = useState([]);
+
+  const [loading, setLoading] = useState(true);
+  const [loadingSubscribers, setLoadingSubscribers] = useState(true);
+  const [error, setError] = useState("");
 
   const colors = ["#7c3aed", "#22c55e", "#f59e0b", "#ef4444", "#3b82f6"];
 
@@ -53,22 +63,40 @@ export default function AdminDashboard() {
     const news = await fetch("https://fameuntold.vercel.app/api/news").then(res => res.json());
     const events = await fetch("https://fameuntold.vercel.app/api/events").then(res => res.json());
     const media = await fetch("https://fameuntold.vercel.app/api/media").then(res => res.json());
-
     setData({ news, events, media });
   };
 
   const fetchUsers = async () => {
     try {
       const token = localStorage.getItem("token");
-
       const res = await fetch("https://fameuntold.vercel.app/api/admin/users", {
         headers: { Authorization: `Bearer ${token}` },
       });
-
       const data = await res.json();
       setUsers(Array.isArray(data) ? data : []);
     } catch {
       setUsers([]);
+    }
+  };
+
+  const fetchContacts = async () => {
+    try {
+      const { data } = await axios.get("https://fameuntold.vercel.app/api/contact/get-contact");
+      setContacts(data);
+      setLoading(false);
+    } catch {
+      setError("Failed to fetch contacts.");
+      setLoading(false);
+    }
+  };
+
+  const fetchSubscribers = async () => {
+    try {
+      const { data } = await axios.get("https://fameuntold.vercel.app/api/newsletter/all");
+      setSubscribers(data);
+      setLoadingSubscribers(false);
+    } catch {
+      setLoadingSubscribers(false);
     }
   };
 
@@ -104,30 +132,14 @@ export default function AdminDashboard() {
 
   const deleteUser = async (id) => {
     const token = localStorage.getItem("token");
-
     await fetch(`https://fameuntold.vercel.app/api/admin/users/${id}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
     });
-
     fetchUsers();
   };
 
-  // ================= CHART =================
-  const chartData = [
-    { name: "Users", value: users.length },
-    { name: "News", value: data.news.length },
-    { name: "Events", value: data.events.length },
-    { name: "Media", value: data.media.length },
-  ];
-
-  const [contacts, setContacts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  const [userSearch, setUserSearch] = useState("");
-  const [contactSearch, setContactSearch] = useState("");
-
+  // ================= FILTER =================
   const filteredUsers = users.filter(user =>
     user.name.toLowerCase().includes(userSearch.toLowerCase()) ||
     user.email.toLowerCase().includes(userSearch.toLowerCase())
@@ -139,34 +151,17 @@ export default function AdminDashboard() {
     contact.message.toLowerCase().includes(contactSearch.toLowerCase())
   );
 
-  const [subscribers, setSubscribers] = useState([]);
-  const [loadingSubscribers, setLoadingSubscribers] = useState(true);
-  const [subscriberSearch, setSubscriberSearch] = useState("");
-
   const filteredSubscribers = subscribers.filter(sub =>
     sub.email.toLowerCase().includes(subscriberSearch.toLowerCase())
   );
 
-  const fetchContacts = async () => {
-    try {
-      const { data } = await axios.get("https://fameuntold.vercel.app/api/contact/get-contact");
-      setContacts(data);
-      setLoading(false);
-    } catch {
-      setError("Failed to fetch contacts.");
-      setLoading(false);
-    }
-  };
-
-  const fetchSubscribers = async () => {
-    try {
-      const { data } = await axios.get("https://fameuntold.vercel.app/api/newsletter/all");
-      setSubscribers(data);
-      setLoadingSubscribers(false);
-    } catch {
-      setLoadingSubscribers(false);
-    }
-  };
+  // ================= CHART =================
+  const chartData = [
+    { name: "Users", value: users.length },
+    { name: "News", value: data.news.length },
+    { name: "Events", value: data.events.length },
+    { name: "Media", value: data.media.length },
+  ];
 
   if (loading) return <p className="p-6">Loading messages...</p>;
   if (error) return <p className="p-6 text-red-500">{error}</p>;
@@ -175,14 +170,14 @@ export default function AdminDashboard() {
     <div className="flex min-h-screen bg-gray-100">
 
       {/* SIDEBAR */}
-      <div className={`fixed md:static top-0 left-0 h-full w-64 bg-gray-900 text-white p-6 flex flex-col z-50 transform transition-transform duration-300 ease-in-out
+      <div className={`fixed md:static top-0 left-0 h-full w-64 bg-gray-900 text-white p-6 flex flex-col z-50 transform transition-transform duration-300
       ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0`}>
 
-        <button onClick={() => setSidebarOpen(false)} className="md:hidden mb-4 text-xl">✕</button>
+        <button onClick={() => setSidebarOpen(false)} className="md:hidden mb-4">✕</button>
 
         <div className="flex items-center">
           <img className="w-16 h-14 filter brightness-0 invert" src={logo} alt="" />
-          <h6 className="text-purple-50 font-bold">FAME UNTOLD</h6>
+          <h6 className="font-bold">FAME UNTOLD</h6>
         </div>
 
         <div className="space-y-2 mt-6">
@@ -209,7 +204,7 @@ export default function AdminDashboard() {
 
       {/* OVERLAY */}
       {sidebarOpen && (
-        <div onClick={() => setSidebarOpen(false)} className="fixed inset-0 bg-black/50 z-40 md:hidden" />
+        <div onClick={() => setSidebarOpen(false)} className="fixed inset-0 bg-black/50 md:hidden" />
       )}
 
       {/* MAIN */}
@@ -217,9 +212,7 @@ export default function AdminDashboard() {
 
         {/* MOBILE HEADER */}
         <div className="flex justify-between items-center mb-4 md:hidden">
-          <button onClick={() => setSidebarOpen(true)} className="text-2xl bg-gray-900 text-white px-3 py-2 rounded">
-            ☰
-          </button>
+          <button onClick={() => setSidebarOpen(true)} className="bg-black text-white px-3 py-2 rounded">☰</button>
           <h1 className="font-bold">Admin</h1>
         </div>
 
@@ -227,78 +220,147 @@ export default function AdminDashboard() {
 
         {/* CHARTS */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-          <div className="bg-white p-6 rounded-2xl shadow">
+          <div className="bg-white p-6 rounded shadow">
             <ResponsiveContainer width="100%" height={250}>
               <BarChart data={chartData}>
                 <XAxis dataKey="name" />
                 <YAxis />
                 <Tooltip />
                 <Bar dataKey="value">
-                  {chartData.map((entry, index) => (
-                    <Cell key={index} fill={colors[index]} />
-                  ))}
+                  {chartData.map((e, i) => <Cell key={i} fill={colors[i]} />)}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
 
-          <div className="bg-white p-6 rounded-2xl shadow">
+          <div className="bg-white p-6 rounded shadow">
             <ResponsiveContainer width="100%" height={250}>
               <PieChart>
-                <Pie data={chartData} dataKey="value" outerRadius={80} label>
-                  {chartData.map((entry, index) => (
-                    <Cell key={index} fill={colors[index]} />
-                  ))}
+                <Pie data={chartData} dataKey="value" outerRadius={80}>
+                  {chartData.map((e, i) => <Cell key={i} fill={colors[i]} />)}
                 </Pie>
               </PieChart>
             </ResponsiveContainer>
           </div>
         </div>
 
+        {/* FORM */}
+        {activeTab !== "users" && (
+          <div className="bg-white p-6 rounded shadow mb-10">
+            <h2 className="font-bold mb-4 capitalize">Add {activeTab}</h2>
+
+            <div className="grid md:grid-cols-3 gap-4">
+              <input placeholder="Title" value={form.title}
+                onChange={(e) => setForm({ ...form, title: e.target.value })}
+                className="border p-2 rounded" />
+
+              <input placeholder="Description" value={form.description}
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
+                className="border p-2 rounded" />
+
+              {activeTab === "media" && (
+                <input placeholder="Link" value={form.link}
+                  onChange={(e) => setForm({ ...form, link: e.target.value })}
+                  className="border p-2 rounded" />
+              )}
+
+              <input type="file" onChange={handleImage} />
+            </div>
+
+            {preview && <img src={preview} className="w-32 mt-3 rounded" />}
+
+            <button onClick={handleSubmit} className="bg-purple-700 text-white px-4 py-2 mt-4 rounded">
+              Add
+            </button>
+          </div>
+        )}
+
         {/* USERS TABLE */}
         {activeTab === "users" && (
-          <div className="bg-gray-300 p-6 rounded-2xl shadow overflow-x-auto">
-            <h2 className="text-3xl font-bold mb-4">Registered Users</h2>
+          <>
+            <div className="bg-gray-300 p-6 rounded shadow overflow-x-auto">
+              <h2 className="text-2xl font-bold mb-4">Users</h2>
 
-            <input
-              placeholder="Search users..."
-              value={userSearch}
-              onChange={(e) => setUserSearch(e.target.value)}
-              className="border p-2 mb-4 w-full rounded"
-            />
+              <input
+                placeholder="Search users..."
+                value={userSearch}
+                onChange={(e) => setUserSearch(e.target.value)}
+                className="border p-2 mb-4 w-full rounded"
+              />
 
-            <table className="w-full text-left">
-              <thead>
-                <tr className="bg-purple-500">
-                  <th className="p-2">Name</th>
-                  <th className="p-2">Email</th>
-                  <th className="p-2">Role</th>
-                  <th className="p-2">Phone</th>
-                  <th className="p-2">Location</th>
-                  <th className="p-2">Message</th>
-                  <th className="p-2">Actions</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {filteredUsers.map((user) => (
-                  <tr key={user._id}>
-                    <td className="p-2">{user.name}</td>
-                    <td className="p-2">{user.email}</td>
-                    <td className="p-2">{user.role}</td>
-                    <td className="p-2">{user.phone || "-"}</td>
-                    <td className="p-2">{user.location || "-"}</td>
-                    <td className="p-2">{user.message || "-"}</td>
-                    <td className="p-2">
-                      <button onClick={() => deleteUser(user._id)} className="bg-red-500 text-white px-2 py-1 rounded">
-                        Delete
-                      </button>
-                    </td>
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-purple-500 text-white">
+                    <th className="p-2">Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+
+                <tbody>
+                  {filteredUsers.map((user) => (
+                    <tr key={user._id}>
+                      <td className="p-2">{user.name}</td>
+                      <td>{user.email}</td>
+                      <td>{user.role}</td>
+                      <td>
+                        <button onClick={() => deleteUser(user._id)} className="bg-red-500 px-2 py-1 text-white rounded">
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* CONTACT TABLE */}
+            <div className="bg-white p-6 mt-10 rounded shadow overflow-x-auto">
+              <h2 className="font-bold mb-4">Contacts</h2>
+
+              <input
+                placeholder="Search..."
+                value={contactSearch}
+                onChange={(e) => setContactSearch(e.target.value)}
+                className="border p-2 mb-4 w-full"
+              />
+
+              <table className="w-full">
+                <tbody>
+                  {filteredContacts.map(c => (
+                    <tr key={c._id}>
+                      <td>{c.name}</td>
+                      <td>{c.email}</td>
+                      <td>{c.message}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* SUBSCRIBERS */}
+            <div className="bg-white p-6 mt-10 rounded shadow overflow-x-auto">
+              <h2 className="font-bold mb-4">Subscribers</h2>
+
+              <input
+                placeholder="Search..."
+                value={subscriberSearch}
+                onChange={(e) => setSubscriberSearch(e.target.value)}
+                className="border p-2 mb-4 w-full"
+              />
+
+              <table className="w-full">
+                <tbody>
+                  {filteredSubscribers.map(s => (
+                    <tr key={s._id}>
+                      <td>{s.email}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
 
       </div>

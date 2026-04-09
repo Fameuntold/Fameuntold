@@ -340,7 +340,7 @@ const Navbar = () => {
                                             handleLogout();
                                             setMobileMenu(false);
                                         }}
-                                        className="bg-red-500 text-white ml-1.5"
+                                        className="bg-red-500 text-white ml-2 py-2 px-3"
                                     >
                                         Logout
                                     </button>
