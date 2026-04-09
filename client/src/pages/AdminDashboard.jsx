@@ -188,9 +188,8 @@ export default function AdminDashboard() {
                 setActiveTab(item.key);
                 setSidebarOpen(false);
               }}
-              className={`flex items-center gap-3 w-full p-3 rounded-lg ${
-                activeTab === item.key ? "bg-purple-600" : "hover:bg-gray-700"
-              }`}
+              className={`flex items-center gap-3 w-full p-3 rounded-lg ${activeTab === item.key ? "bg-purple-600" : "hover:bg-gray-700"
+                }`}
             >
               {item.icon} {item.label}
             </button>
@@ -278,87 +277,134 @@ export default function AdminDashboard() {
         {/* USERS TABLE */}
         {activeTab === "users" && (
           <>
-            <div className="bg-gray-300 p-6 rounded shadow overflow-x-auto">
-              <h2 className="text-2xl font-bold mb-4">Users</h2>
+            <div className="bg-white p-6 rounded-2xl shadow-lg overflow-hidden">
+              <h2 className="text-2xl font-bold mb-4 text-gray-800">Users</h2>
 
               <input
                 placeholder="Search users..."
                 value={userSearch}
                 onChange={(e) => setUserSearch(e.target.value)}
-                className="border p-2 mb-4 w-full rounded"
+                className="border border-gray-300 focus:ring-2 focus:ring-purple-500 outline-none p-2 mb-4 w-full rounded-lg"
               />
 
-              <table className="w-full">
-                <thead>
-                  <tr className="bg-purple-500 text-white">
-                    <th className="p-2">Name</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {filteredUsers.map((user) => (
-                    <tr key={user._id}>
-                      <td className="p-2">{user.name}</td>
-                      <td>{user.email}</td>
-                      <td>{user.role}</td>
-                      <td>
-                        <button onClick={() => deleteUser(user._id)} className="bg-red-500 px-2 py-1 text-white rounded">
-                          Delete
-                        </button>
-                      </td>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm text-left border-collapse">
+                  <thead className="bg-purple-600 text-white sticky top-0">
+                    <tr>
+                      <th className="px-4 py-3">Name</th>
+                      <th className="px-4 py-3">Email</th>
+                      <th className="px-4 py-3">Role</th>
+                      <th className="px-4 py-3 text-center">Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+
+                  <tbody>
+                    {filteredUsers.map((user, index) => (
+                      <tr
+                        key={user._id}
+                        className={`border-b transition ${index % 2 === 0 ? "bg-gray-50" : "bg-white"
+                          } hover:bg-purple-50`}
+                      >
+                        <td className="px-4 py-3 font-medium text-gray-800">{user.name}</td>
+                        <td className="px-4 py-3 text-gray-600">{user.email}</td>
+                        <td className="px-4 py-3">
+                          <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-700">
+                            {user.role}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <button
+                            onClick={() => deleteUser(user._id)}
+                            className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg text-xs shadow"
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
 
             {/* CONTACT TABLE */}
-            <div className="bg-white p-6 mt-10 rounded shadow overflow-x-auto">
-              <h2 className="font-bold mb-4">Contacts</h2>
+            <div className="bg-white p-6 mt-10 rounded-2xl shadow-lg overflow-hidden">
+              <h2 className="text-xl font-bold mb-4 text-gray-800">Contact Messages</h2>
 
               <input
-                placeholder="Search..."
+                placeholder="Search messages..."
                 value={contactSearch}
                 onChange={(e) => setContactSearch(e.target.value)}
-                className="border p-2 mb-4 w-full"
+                className="border border-gray-300 focus:ring-2 focus:ring-purple-500 outline-none p-2 mb-4 w-full rounded-lg"
               />
 
-              <table className="w-full">
-                <tbody>
-                  {filteredContacts.map(c => (
-                    <tr key={c._id}>
-                      <td>{c.name}</td>
-                      <td>{c.email}</td>
-                      <td>{c.message}</td>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm text-left border-collapse">
+                  <thead className="bg-purple-600 text-white">
+                    <tr>
+                      <th className="px-4 py-3">Name</th>
+                      <th className="px-4 py-3">Email</th>
+                      <th className="px-4 py-3">Message</th>
+                      <th className="px-4 py-3">Date</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+
+                  <tbody>
+                    {filteredContacts.map((c, index) => (
+                      <tr
+                        key={c._id}
+                        className={`border-b ${index % 2 === 0 ? "bg-gray-50" : "bg-white"
+                          } hover:bg-purple-50`}
+                      >
+                        <td className="px-4 py-3 font-medium">{c.name}</td>
+                        <td className="px-4 py-3 text-gray-600">{c.email}</td>
+                        <td className="px-4 py-3 max-w-xs truncate">{c.message}</td>
+                        <td className="px-4 py-3 text-gray-500 text-xs">
+                          {new Date(c.createdAt).toLocaleString()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
 
             {/* SUBSCRIBERS */}
-            <div className="bg-white p-6 mt-10 rounded shadow overflow-x-auto">
-              <h2 className="font-bold mb-4">Subscribers</h2>
+            <div className="bg-white p-6 mt-10 rounded-2xl shadow-lg overflow-hidden">
+              <h2 className="text-xl font-bold mb-4 text-gray-800">Subscribers</h2>
 
               <input
-                placeholder="Search..."
+                placeholder="Search email..."
                 value={subscriberSearch}
                 onChange={(e) => setSubscriberSearch(e.target.value)}
-                className="border p-2 mb-4 w-full"
+                className="border border-gray-300 focus:ring-2 focus:ring-purple-500 outline-none p-2 mb-4 w-full rounded-lg"
               />
 
-              <table className="w-full">
-                <tbody>
-                  {filteredSubscribers.map(s => (
-                    <tr key={s._id}>
-                      <td>{s.email}</td>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm text-left border-collapse">
+                  <thead className="bg-purple-600 text-white">
+                    <tr>
+                      <th className="px-4 py-3">Email</th>
+                      <th className="px-4 py-3">Subscribed At</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+
+                  <tbody>
+                    {filteredSubscribers.map((s, index) => (
+                      <tr
+                        key={s._id}
+                        className={`border-b ${index % 2 === 0 ? "bg-gray-50" : "bg-white"
+                          } hover:bg-purple-50`}
+                      >
+                        <td className="px-4 py-3">{s.email}</td>
+                        <td className="px-4 py-3 text-gray-500 text-xs">
+                          {new Date(s.subscribedAt).toLocaleString()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </>
         )}

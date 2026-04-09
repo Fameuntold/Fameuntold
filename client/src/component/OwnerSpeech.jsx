@@ -36,10 +36,10 @@ export default function OwnerSpeech() {
 
     const navigate = useNavigate()
   return (
-  <div className="relative min-h-screen bg-gray-100 overflow-hidden">
+  <div className="relative w-full min-h-screen bg-gray-100 overflow-hidden">
 
     {/* Background texture */}
-    <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/marble.png')] opacity-40"></div>
+    <div className="absolute w-full inset-0 bg-[url('https://www.transparenttextures.com/patterns/marble.png')] opacity-40"></div>
 
     <div className="relative grid md:grid-cols-2 items-center min-h-screen px-4 sm:px-6 md:px-12 lg:px-20 gap-10">
 
@@ -86,7 +86,7 @@ export default function OwnerSpeech() {
         {/* Image */}
         <motion.div
           variants={imageZoom}
-          className="relative w-[380px]  md:w-[380px] lg:w-[440px] h-64 sm:h-80 md:h-[450px] lg:h-[500px] overflow-hidden"
+          className="relative w-[280px]  md:w-[380px] lg:w-[440px] h-64 sm:h-80 md:h-[450px] lg:h-[500px] overflow-hidden"
         >
           <img
             src={ceo}
