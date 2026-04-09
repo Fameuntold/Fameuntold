@@ -49,7 +49,7 @@ export default function CounsellingSupportPage() {
                     <h2 className="text-4xl text-purple-800 font-bold mb-6 text-center mt-15">What We Offer</h2>
 
                     {/* Intro */}
-                    <div className=" ml-[8rem] mb-10">
+                    <div className="ml-0 md:ml-[8rem] mb-10">
                         <p className="text-gray-700 text-center w-[90%] leading-relaxed">
                             At our ministry, we believe that everyone deserves care, understanding, and support
                             no matter what they are going through. Life can bring challenges such as stress, grief,
