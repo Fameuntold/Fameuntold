@@ -11,12 +11,14 @@ import {
   FaUsers
 } from "react-icons/fa";
 import logo from "../assets/logo.png";
-import axios from "axios"
+import axios from "axios";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState("news");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   const [data, setData] = useState({ news: [], events: [], media: [] });
   const [users, setUsers] = useState([]);
 
@@ -42,6 +44,8 @@ export default function AdminDashboard() {
   useEffect(() => {
     fetchData();
     fetchUsers();
+    fetchContacts();
+    fetchSubscribers();
   }, []);
 
   // ================= FETCH =================
@@ -98,41 +102,6 @@ export default function AdminDashboard() {
     fetchData();
   };
 
-  const openEdit = (item) => {
-    setCurrentItem(item);
-    setForm({
-      title: item.title,
-      description: item.description || "",
-      link: item.link || "",
-    });
-    setPreview(item.image ? `https://fameuntold.vercel.app/${item.image}` : "");
-    setEditModal(true);
-  };
-
-  const handleUpdate = async () => {
-    const formData = new FormData();
-    formData.append("title", form.title);
-    formData.append("description", form.description);
-    formData.append("link", form.link);
-    if (image) formData.append("image", image);
-
-    await fetch(`https://fameuntold.vercel.app/api/${activeTab}/${currentItem._id}`, {
-      method: "PUT",
-      body: formData,
-    });
-
-    setEditModal(false);
-    setImage(null);
-    fetchData();
-  };
-
-  const handleDelete = async (id) => {
-    await fetch(`https://fameuntold.vercel.app/api/${activeTab}/${id}`, {
-      method: "DELETE",
-    });
-    fetchData();
-  };
-
   const deleteUser = async (id) => {
     const token = localStorage.getItem("token");
 
@@ -143,7 +112,6 @@ export default function AdminDashboard() {
 
     fetchUsers();
   };
-
 
   // ================= CHART =================
   const chartData = [
@@ -160,14 +128,11 @@ export default function AdminDashboard() {
   const [userSearch, setUserSearch] = useState("");
   const [contactSearch, setContactSearch] = useState("");
 
-
-  // Filtered users
   const filteredUsers = users.filter(user =>
     user.name.toLowerCase().includes(userSearch.toLowerCase()) ||
     user.email.toLowerCase().includes(userSearch.toLowerCase())
   );
 
-  // Filtered contacts
   const filteredContacts = contacts.filter(contact =>
     contact.name.toLowerCase().includes(contactSearch.toLowerCase()) ||
     contact.email.toLowerCase().includes(contactSearch.toLowerCase()) ||
@@ -177,100 +142,91 @@ export default function AdminDashboard() {
   const [subscribers, setSubscribers] = useState([]);
   const [loadingSubscribers, setLoadingSubscribers] = useState(true);
   const [subscriberSearch, setSubscriberSearch] = useState("");
+
   const filteredSubscribers = subscribers.filter(sub =>
     sub.email.toLowerCase().includes(subscriberSearch.toLowerCase())
   );
-
-
 
   const fetchContacts = async () => {
     try {
       const { data } = await axios.get("https://fameuntold.vercel.app/api/contact/get-contact");
       setContacts(data);
       setLoading(false);
-    } catch (err) {
-      console.error(err);
+    } catch {
       setError("Failed to fetch contacts.");
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchContacts();
-  }, []);
-
-
-  // Fetch subscribers
   const fetchSubscribers = async () => {
     try {
       const { data } = await axios.get("https://fameuntold.vercel.app/api/newsletter/all");
       setSubscribers(data);
       setLoadingSubscribers(false);
-    } catch (err) {
-      console.error(err);
+    } catch {
       setLoadingSubscribers(false);
     }
   };
 
-  useEffect(() => {
-    fetchSubscribers();
-  }, [])
-
-
   if (loading) return <p className="p-6">Loading messages...</p>;
   if (error) return <p className="p-6 text-red-500">{error}</p>;
-
-  if (contacts.length === 0) {
-    return <p className="p-6 text-gray-600">No messages available.</p>;
-  }
 
   return (
     <div className="flex min-h-screen bg-gray-100">
 
       {/* SIDEBAR */}
-      <div className="w-64 bg-gray-900 text-white p-6 flex flex-col">
+      <div className={`fixed md:static top-0 left-0 h-full w-64 bg-gray-900 text-white p-6 flex flex-col z-50 transform transition-transform duration-300 ease-in-out
+      ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0`}>
 
-        <div className="w-full flex items-center">
-          <img
-            className="w-18 h-16 filter brightness-0 invert"
-            src={logo}
-            alt=""
-          />
-          <h6 className="text-purple-50 w-full font-bold">FAME UNTOLD</h6>
+        <button onClick={() => setSidebarOpen(false)} className="md:hidden mb-4 text-xl">✕</button>
+
+        <div className="flex items-center">
+          <img className="w-16 h-14 filter brightness-0 invert" src={logo} alt="" />
+          <h6 className="text-purple-50 font-bold">FAME UNTOLD</h6>
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-2 mt-6">
           {menuItems.map((item) => (
             <button
               key={item.key}
-              onClick={() => setActiveTab(item.key)}
-              className={`flex items-center gap-3 w-full p-3 rounded-lg ${activeTab === item.key
-                ? "bg-purple-600"
-                : "hover:bg-gray-700"
-                }`}
+              onClick={() => {
+                setActiveTab(item.key);
+                setSidebarOpen(false);
+              }}
+              className={`flex items-center gap-3 w-full p-3 rounded-lg ${
+                activeTab === item.key ? "bg-purple-600" : "hover:bg-gray-700"
+              }`}
             >
-              <span>{item.icon}</span>
-              <span>{item.label}</span>
+              {item.icon} {item.label}
             </button>
           ))}
         </div>
 
-        <button
-          onClick={handleLogout}
-          className="mt-auto bg-red-500 p-3 rounded-lg"
-        >
+        <button onClick={handleLogout} className="mt-auto bg-red-500 p-3 rounded-lg">
           Logout
         </button>
       </div>
 
+      {/* OVERLAY */}
+      {sidebarOpen && (
+        <div onClick={() => setSidebarOpen(false)} className="fixed inset-0 bg-black/50 z-40 md:hidden" />
+      )}
+
       {/* MAIN */}
-      <div className="flex-1 p-6">
+      <div className="flex-1 p-4 md:p-6 w-full">
+
+        {/* MOBILE HEADER */}
+        <div className="flex justify-between items-center mb-4 md:hidden">
+          <button onClick={() => setSidebarOpen(true)} className="text-2xl bg-gray-900 text-white px-3 py-2 rounded">
+            ☰
+          </button>
+          <h1 className="font-bold">Admin</h1>
+        </div>
 
         <h1 className="text-2xl font-bold mb-6">Admin Dashboard</h1>
 
         {/* CHARTS */}
-        <div className="grid md:grid-cols-2 gap-6 mb-10">
-
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
           <div className="bg-white p-6 rounded-2xl shadow">
             <ResponsiveContainer width="100%" height={250}>
               <BarChart data={chartData}>
@@ -297,56 +253,23 @@ export default function AdminDashboard() {
               </PieChart>
             </ResponsiveContainer>
           </div>
-
         </div>
-
-        {/* FORM */}
-        {activeTab !== "users" && (
-          <div className="bg-white p-6 rounded-2xl shadow mb-10">
-            <h2 className="font-bold mb-4 capitalize">Add {activeTab}</h2>
-
-            <div className="grid md:grid-cols-3 gap-4">
-              <input placeholder="Title" value={form.title}
-                onChange={(e) => setForm({ ...form, title: e.target.value })}
-                className="border p-2 rounded" />
-
-              <input placeholder="Description" value={form.description}
-                onChange={(e) => setForm({ ...form, description: e.target.value })}
-                className="border p-2 rounded" />
-
-              {activeTab === "media" && (
-                <input placeholder="Link" value={form.link}
-                  onChange={(e) => setForm({ ...form, link: e.target.value })}
-                  className="border p-2 rounded" />
-              )}
-
-              <input type="file" onChange={handleImage} />
-            </div>
-
-            {preview && <img src={preview} className="w-32 mt-3 rounded" />}
-
-            <button onClick={handleSubmit}
-              className="bg-purple-700 text-white px-4 py-2 mt-4 rounded">
-              Add
-            </button>
-          </div>
-        )}
 
         {/* USERS TABLE */}
         {activeTab === "users" && (
-          <div className="bg-gray-300 p-6 rounded-2xl shadow">
+          <div className="bg-gray-300 p-6 rounded-2xl shadow overflow-x-auto">
             <h2 className="text-3xl font-bold mb-4">Registered Users</h2>
 
             <input
               placeholder="Search users..."
               value={userSearch}
               onChange={(e) => setUserSearch(e.target.value)}
-              className="border outline-0 border-gray-200 p-2 mb-4 w-full rounded"
+              className="border p-2 mb-4 w-full rounded"
             />
 
             <table className="w-full text-left">
               <thead>
-                <tr className="border-b bg-purple-500">
+                <tr className="bg-purple-500">
                   <th className="p-2">Name</th>
                   <th className="p-2">Email</th>
                   <th className="p-2">Role</th>
@@ -359,17 +282,17 @@ export default function AdminDashboard() {
 
               <tbody>
                 {filteredUsers.map((user) => (
-                  <tr key={user._id} className="border-b hover:bg-gray-50">
+                  <tr key={user._id}>
                     <td className="p-2">{user.name}</td>
                     <td className="p-2">{user.email}</td>
                     <td className="p-2">{user.role}</td>
                     <td className="p-2">{user.phone || "-"}</td>
                     <td className="p-2">{user.location || "-"}</td>
                     <td className="p-2">{user.message || "-"}</td>
-
-                    <td className="p-2 space-x-2">
-                      <button onClick={() => setViewUser(user)} className="bg-green-500 text-white px-2 py-1 rounded">View</button>
-                      <button onClick={() => deleteUser(user._id)} className="bg-red-500 text-white px-2 py-1 rounded">Delete</button>
+                    <td className="p-2">
+                      <button onClick={() => deleteUser(user._id)} className="bg-red-500 text-white px-2 py-1 rounded">
+                        Delete
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -377,103 +300,6 @@ export default function AdminDashboard() {
             </table>
           </div>
         )}
-
-        {/* USER MODAL */}
-        {viewUser && (
-          <div className="fixed inset-0 bg-black/50 flex justify-center items-center">
-            <div className="bg-white p-6 rounded-2xl w-96">
-              <h2 className="font-bold mb-3">User Details</h2>
-
-              <p>Name: {viewUser.name}</p>
-              <p>Email: {viewUser.email}</p>
-              <p>Role: {viewUser.role}</p>
-
-              <button onClick={() => setViewUser(null)}
-                className="bg-gray-800 text-white px-4 py-2 mt-3 rounded">
-                Close
-              </button>
-            </div>
-          </div>
-        )}
-
-        {activeTab === "users" && (
-          <div className="max-w-7xl mx-auto px-6 py-10">
-            <h1 className="text-3xl font-bold mb-6">Contact Messages</h1>
-
-            <input
-              placeholder="Search messages..."
-              value={contactSearch}
-              onChange={(e) => setContactSearch(e.target.value)}
-              className="border outline-0 border-purple-400 p-2 mb-4 w-full rounded"
-            />
-
-            <div className="overflow-x-auto">
-              <table className="w-full table-auto border-collapse border border-gray-300">
-                <thead>
-                  <tr className="bg-purple-500">
-                    <th className="border border-gray-300 px-4 py-2 text-left">Name</th>
-                    <th className="border border-gray-300 px-4 py-2 text-left">Email</th>
-                    <th className="border border-gray-300 px-4 py-2 text-left">Message</th>
-                    <th className="border border-gray-300 px-4 py-2 text-left">Date</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredContacts.map((contact) => (
-                    <tr key={contact._id} className="hover:bg-gray-50">
-                      <td className="border border-gray-300 px-4 py-2">{contact.name}</td>
-                      <td className="border border-gray-300 px-4 py-2">{contact.email}</td>
-                      <td className="border border-gray-300 px-4 py-2">{contact.message}</td>
-                      <td className="border border-gray-300 px-4 py-2">
-                        {new Date(contact.createdAt).toLocaleString()}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-        )}
-        {activeTab === "users" && (
-          <div className="bg-gray-200 p-6 rounded-2xl shadow mt-10">
-            <h2 className="text-3xl font-bold mb-4">Newsletter Subscribers</h2>
-
-            <input
-              placeholder="Search by email..."
-              value={subscriberSearch}
-              onChange={(e) => setSubscriberSearch(e.target.value)}
-              className="border outline-0 border-gray-300 p-2 mb-4 w-full rounded"
-            />
-
-            {loadingSubscribers ? (
-              <p>Loading subscribers...</p>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full table-auto border-collapse border border-gray-300">
-                  <thead>
-                    <tr className="bg-purple-500 text-white">
-                      <th className="border border-gray-300 px-4 py-2">Email</th>
-                      <th className="border border-gray-300 px-4 py-2">Subscribed At</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredSubscribers.map((sub) => (
-                      <tr key={sub._id} className="hover:bg-gray-50">
-                        <td className="border border-gray-300 px-4 py-2">{sub.email}</td>
-                        <td className="border border-gray-300 px-4 py-2">
-                          {new Date(sub.subscribedAt).toLocaleString()}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-
-        )}
-
-
 
       </div>
     </div>

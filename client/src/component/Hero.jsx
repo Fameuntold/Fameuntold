@@ -53,7 +53,7 @@ export default function Hero() {
   const slide = slides[current];
 
   return (
-    <section className="relative min-h-[60vh] md:min-h-[90vh] overflow-hidden bg-black">
+    <section className="relative min-h-[80vh] md:min-h-[90vh] overflow-hidden bg-black">
       {/* BACKGROUND IMAGE */}
       <div
         key={current}
@@ -80,7 +80,7 @@ export default function Hero() {
 
       {/* TEXT + FOREGROUND */}
       {showContent && (
-        <div className="relative z-50 flex items-center justify-center h-full px-4 md:px-10">
+        <div className="relative z-30 flex items-center justify-center h-full px-4 md:px-10">
 
           {/* Decorative Shapes */}
           <div className="absolute w-80 h-80 md:w-96 md:h-96 border-[16px] border-amber-50/10 top-14 left-4 md:left-10 rounded-full animate-textUp">
