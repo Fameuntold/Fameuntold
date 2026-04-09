@@ -51,7 +51,7 @@ export default function Leadership() {
                 <h2 className="text-3xl font-bold text-purple-900 mb-4">
                     Our Leadership Team
                 </h2>
-                <p className="text-gray-700 text-start md:text-center flex leading-relaxed mb-3 w-[85%] ml-0 md:ml-[6rem]">
+                <p className="text-gray-700 text-start md:text-center flex leading-relaxed mb-3 w-[95%] md:w-[85%] ml-0 md:ml-[6rem]">
 
                     While young people possess immense potential, many lack the leadership
                     skills and practical capacities needed to translate that potential into positive
